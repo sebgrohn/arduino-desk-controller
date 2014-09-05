@@ -77,48 +77,51 @@ void loop()  {
   
   controller.update();
   
-  controller.setEnabled(enableDebouncer.read() == LOW);
-  
-  /*if (enableDebouncer.read() == LOW && enableSwitchChanged) {
-    double targetHeight = controller.getTargetHeight();
+  if (enableDebouncer.read() == LOW && enableSwitchChanged && !controller.isEnabled()) {
+    const double targetHeight = controller.getTargetHeight();
     
-    Serial.print("Enabling and driving to target height ");
-    Serial.print(targetHeight, 3);
-    Serial.println(" m...");
+    //Serial.print("Enabling and driving to target height ");
+    //Serial.print(targetHeight, 3);
+    //Serial.println(" m...");
     
-    //double savedHeight;
-    //const int ign = EEPROM_readAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, savedHeight);
-  
     if (!controller.isAtTargetHeight()) {
       EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, targetHeight);
     }
-  }*/
+  }
   
-  const double targetHeight = controller.getTargetHeight();
-  if (targetHeight == controllerParams.minHeight) {
-    if (upDebouncer.read() == LOW && upSwitchChanged && !controller.isDrivingUp()) {
-      setSitDeskHeight();
-    }
-  } else if (targetHeight == sitHeight) {
-    if (upDebouncer.read() == LOW && upSwitchChanged && !controller.isDrivingUp()) {
-      setStandDeskHeight();
-    }
-    if (downDebouncer.read() == LOW && downSwitchChanged && !controller.isDrivingDown()) {
-      setMinDeskHeight();
-    }
-  } else if (targetHeight == standHeight) {
-    if (upDebouncer.read() == LOW && upSwitchChanged && !controller.isDrivingUp()) {
-      setMaxDeskHeight();
-    }
-    if (downDebouncer.read() == LOW && downSwitchChanged && !controller.isDrivingDown()) {
-      setSitDeskHeight();
-    }
-  } else if (targetHeight == controllerParams.maxHeight) {
-    if (downDebouncer.read() == LOW && downSwitchChanged && !controller.isDrivingDown()) {
-      setStandDeskHeight();
+  controller.setEnabled(enableDebouncer.read() == LOW);
+  
+  if (upDebouncer.read() == LOW && upSwitchChanged) {
+    if (!controller.isDriving()) {
+      const double targetHeight = controller.getTargetHeight();
+      
+      if (targetHeight == controllerParams.minHeight) {
+        setSitDeskHeight();
+      } else if (targetHeight == sitHeight) {
+        setStandDeskHeight();
+      } else if (targetHeight == standHeight) {
+        setMaxDeskHeight();
+      }
+    } else if (controller.isDrivingDown()) {
+      stopDesk();
     }
   }
-    
+  if (downDebouncer.read() == LOW && downSwitchChanged) {
+    if (!controller.isDriving()) {
+      const double targetHeight = controller.getTargetHeight();
+      
+      if (targetHeight == sitHeight) {
+        setMinDeskHeight();
+      } else if (targetHeight == standHeight) {
+        setSitDeskHeight();
+      } else if (targetHeight == controllerParams.maxHeight) {
+        setStandDeskHeight();
+      }
+    } else if (controller.isDrivingUp()) {
+      stopDesk();
+    }
+  }
+  
   digitalWrite(syncLedPin, timeStatus() == timeSet ? HIGH : LOW);
   digitalWrite(statusLedPin, controller.isDriving() || upDebouncer.read() == LOW || downDebouncer.read() == LOW ? HIGH : LOW);
   
@@ -136,7 +139,7 @@ void processSyncMessage() {
   if (Serial.read() == TIME_HEADER[0]) {
     const boolean firstTimeInit = (timeStatus() == timeNotSet);
     
-    setTime(Serial.parseInt()); // Sync Arduino clock to the time received on the serial port
+    setTime(Serial.parseInt());
     
     if (firstTimeInit) {
       digitalClockDisplay();
@@ -199,32 +202,28 @@ void setupDebouncer(Bounce& debouncer, const int& pin) {
 }
 
 void stopDesk() {
-  if (controller.isDriving()) {
-    digitalClockDisplay();
-    Serial.print("Stopping at height ");
-    Serial.print(controller.getCurrentHeight(), 3);
-    Serial.println(" m");
-    
-    controller.stopDrive();
+  digitalClockDisplay();
+  Serial.print("Stopping at height ");
+  Serial.print(controller.getCurrentHeight(), 3);
+  Serial.println(" m");
+  
+  controller.stopDrive();
+  
+  if (controller.isEnabled() && !controller.isAtTargetHeight()) {
     EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, controller.getCurrentHeight());
   }
 }
 
-void setDeskHeight(const double& height) {
+void setDeskHeight(const double& targetHeight) {
   digitalClockDisplay();
   Serial.print("Setting new height ");
-  Serial.print(height, 3);
+  Serial.print(targetHeight, 3);
   Serial.println(" m");
   
-  controller.setHeight(height);
+  controller.setHeight(targetHeight);
   
-  if (controller.isEnabled()) {
-    //double savedHeight;
-    //const int ign = EEPROM_readAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, savedHeight);
-    
-    if (!controller.isAtTargetHeight()) {
-      EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, height);
-    }
+  if (controller.isEnabled() && !controller.isAtTargetHeight()) {
+    EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, targetHeight);
   }
 }
 

@@ -88,9 +88,9 @@ void HeightDeskController::update() {
 void HeightDeskController::setEnabled(const boolean& newEnabled) {
   BaseDeskController::setEnabled(newEnabled);
   
-  /*if (newEnabled) {
+  if (newEnabled) {
     resumeDrive();
-  }*/
+  }
 }
 
 void HeightDeskController::startDrive(const DeskDrivingDirection& direction) {
