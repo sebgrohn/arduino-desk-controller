@@ -6,8 +6,8 @@
 
 enum DeskDrivingDirection {
   DOWN = -1,
-  NONE = 0,
-  UP   = 1
+  NONE =  0,
+  UP   =  1
 };
 
 
@@ -28,11 +28,11 @@ public:
   
   boolean isDrivingDown() const;
   
-  /*virtual*/ void setEnabled(const boolean& newEnabled);
+  virtual void setEnabled(const boolean& newEnabled);
   
-  /*virtual*/ void startDrive(const DeskDrivingDirection& direction);
+  virtual void startDrive(const DeskDrivingDirection& direction);
   
-  /*virtual*/ void stopDrive();
+  virtual void stopDrive();
   
 private:
   boolean enabled;

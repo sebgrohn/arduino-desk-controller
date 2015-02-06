@@ -66,6 +66,7 @@ void HeightDeskController::setHeight(const double& newHeight) {
 
 void HeightDeskController::resumeDrive() {
   if (isAtTargetHeight()) {
+    // TODO fel ifall targetHeight == (params.minHeight || params.maxHeight) och vi inte kör för tillfället
     stopDrive();
   } else {
     const double& currentHeight = getCurrentHeight();
@@ -77,18 +78,19 @@ void HeightDeskController::resumeDrive() {
   }
 }
 
-void HeightDeskController::update() {
-  if (isDriving()) {
-    if (isAtTargetHeight()) {
-      stopDrive();
-    }
+boolean HeightDeskController::update() {
+  if (isDriving() && isAtTargetHeight()) {
+    stopDrive();
+    return true;
+  } else {
+    return false;
   }
 }
 
 void HeightDeskController::setEnabled(const boolean& newEnabled) {
   BaseDeskController::setEnabled(newEnabled);
   
-  if (newEnabled) {
+  if (/*!isEnabled() &&*/ newEnabled) {
     resumeDrive();
   }
 }

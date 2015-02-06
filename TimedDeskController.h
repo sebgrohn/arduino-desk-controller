@@ -14,11 +14,11 @@ public:
   
   void startDriveTime(const double& newTimeDiff, const DeskDrivingDirection& direction);
   
-  /*virtual*/ void update();
+  virtual boolean update();
   
-  /*virtual*/ void startDrive(const DeskDrivingDirection& direction);
+  virtual void startDrive(const DeskDrivingDirection& direction);
   
-  /*virtual*/ void stopDrive();
+  virtual void stopDrive();
   
 private:
   double targetTimeDiff;

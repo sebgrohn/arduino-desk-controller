@@ -8,17 +8,17 @@
 
 struct DeskControllerParams {
 
-  /// The lowest possible height if the desk, in m.
-  const double minHeight;
+  /// The lowest possible height of the desk, in m.
+  double minHeight;
   
-  /// The highest possible height if the desk, in m.
-  const double maxHeight;
+  /// The highest possible height of the desk, in m.
+  double maxHeight;
   
   // The speed with which the desk is raised, in m/s.
-  const double upSpeed;
+  double upSpeed;
   
   // The speed with which the desk is lowered, in m/s.
-  const double downSpeed;
+  double downSpeed;
   
   DeskControllerParams(const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed);
   
@@ -48,16 +48,16 @@ public:
   
   void resumeDrive();
   
-  /*virtual*/ void update();
+  virtual boolean update();
   
-  /*virtual*/ void setEnabled(const boolean& newEnabled);
+  virtual void setEnabled(const boolean& newEnabled);
   
-  /*virtual*/ void startDrive(const DeskDrivingDirection& direction);
+  virtual void startDrive(const DeskDrivingDirection& direction);
   
-  /*virtual*/ void stopDrive();
+  virtual void stopDrive();
   
 private:
-  static const double HEIGHT_DIFF_TOLERANCE = 0.01;
+  static const double HEIGHT_DIFF_TOLERANCE = 0.001;
   
   double targetHeight;
   double lastStoppedHeight;

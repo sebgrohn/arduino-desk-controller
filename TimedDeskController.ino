@@ -24,11 +24,12 @@ void TimedDeskController::startDriveTime(const double& newTimeDiff, const DeskDr
   }
 }
 
-void TimedDeskController::update() {
-  if (isDriving()) {
-    if (shouldStop()) {
-      stopDrive();
-    }
+boolean TimedDeskController::update() {
+  if (isDriving() && shouldStop()) {
+    stopDrive();
+    return true;
+  } else {
+    return false;
   }
 }
 

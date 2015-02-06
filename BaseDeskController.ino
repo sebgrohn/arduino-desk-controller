@@ -21,7 +21,7 @@ boolean BaseDeskController::isDrivingUp() const { return drivingDirection == UP;
 boolean BaseDeskController::isDrivingDown() const { return drivingDirection == DOWN; }
 
 void BaseDeskController::setEnabled(const boolean& newEnabled) {
-  if (!newEnabled) {
+  if (enabled && !newEnabled) {
     stopDrive();
   }
   
