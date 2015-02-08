@@ -32,35 +32,29 @@ const HeightDeskControllerParams controllerParams(
 HeightDeskController controller(controllerParams, !isnan(initialHeight) ? initialHeight : controllerParams.minHeight);
 
 void setupAlarm(const int& hours, const int& minutes, void (*function)()) {
-  boolean success = true;
+  const boolean success = (Alarm.alarmRepeat(hours, minutes, 0, function) != dtINVALID_ALARM_ID);
   
-  success &= (Alarm.alarmRepeat(hours, minutes, 0, function) != dtINVALID_ALARM_ID);
-  
-  Serial.print("                    ");
-  Serial.print(function != setStandDeskHeight ? (function != setSitDeskHeight ? "Other" : "Lower") : "Raise");
-  Serial.print(" at ");
-  printDigits(hours);
+  Serial.print("\t");
+  printDigits(Serial, hours);
   Serial.print(":");
-  printDigits(minutes);
-  Serial.print(" every day");
-  
-  if (success) {
-    Serial.println(" SET");
-  } else {
-    Serial.println(" FAILED");
-  }
+  printDigits(Serial, minutes);
+  Serial.print(" ");
+  Serial.print(function != setStandDeskHeight ? (function != setSitDeskHeight ? "?" : "v") : "^");
+  Serial.print(success ? "" : " FAILED");
 }
 
 
 void setup()  {
   Serial.begin(57600);
   
-  Serial.print("Initial height set to ");
-  Serial.print(initialHeight, 3);
-  Serial.println(" m");
+  printDateTime(Serial);
+  Serial.print(" Initial height: ");
+  printLength(Serial, initialHeight);
+  Serial.println();
   
   setSyncProvider(requestSync);  //set function to call when sync required
-  Serial.println("Waiting for sync message...");
+  printDateTime(Serial);
+  Serial.println(" Waiting for time sync...");
   
   setupDebouncer(enableDebouncer, enableInputPin);
   setupDebouncer(upDebouncer, upInputPin);
@@ -68,67 +62,90 @@ void setup()  {
   
   pinMode(statusLedPin, OUTPUT);
   pinMode(syncLedPin, OUTPUT);
-} 
+  
+  controller.setEnabled(enableDebouncer.read() == LOW);
+}
 
 void loop()  {
   if (Serial.available()) {
     processSyncMessage();
   }
   
-  const boolean enableSwitchChanged = enableDebouncer.update();
-  const boolean upSwitchChanged     = upDebouncer.update();
-  const boolean downSwitchChanged   = downDebouncer.update();
+  const boolean enableChanged = enableDebouncer.update();
+  const boolean upChanged     = upDebouncer.update();
+  const boolean downChanged   = downDebouncer.update();
   
-  controller.update();
+  const boolean reachedTargetHeight = controller.update();
   
-  if (enableDebouncer.read() == LOW && enableSwitchChanged && !controller.isEnabled()) {
-    const double targetHeight = controller.getTargetHeight();
+  const boolean enable = (enableDebouncer.read() == LOW);
+  const boolean up     = (upDebouncer.read() == LOW);
+  const boolean down   = (downDebouncer.read() == LOW);
+  
+  if (enableChanged) {
+    printDateTime(Serial);
+    Serial.println(enable ? " Enabled" : " Disabled");
     
-    //Serial.print("Enabling and driving to target height ");
-    //Serial.print(targetHeight, 3);
-    //Serial.println(" m...");
+    controller.setEnabled(enable);
     
-    if (!controller.isAtTargetHeight()) {
+    if (enable && !controller.isAtTargetHeight()) {
+      const double targetHeight = controller.getTargetHeight();
+      
+      printDateTime(Serial);
+      Serial.print(" Saving height: ");
+      printLength(Serial, targetHeight);
+      Serial.println();
+      
       EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, targetHeight);
     }
   }
   
-  controller.setEnabled(enableDebouncer.read() == LOW);
-  
-  if (upDebouncer.read() == LOW && upSwitchChanged) {
-    if (!controller.isDriving()) {
-      const double targetHeight = controller.getTargetHeight();
+  if (upChanged && up) {
+    switch (controller.getDrivingDirection()) {
+    case UP:
+      break;
       
-      if (targetHeight == controllerParams.minHeight) {
-        setSitDeskHeight();
-      } else if (targetHeight == sitHeight) {
-        setStandDeskHeight();
-      } else if (targetHeight == standHeight) {
-        setMaxDeskHeight();
-      }
-    } else if (controller.isDrivingDown()) {
+    case DOWN:
       stopDesk();
+      break;
+      
+    case NONE:
+      const double height = (controller.isAtTargetHeight() ? controller.getTargetHeight() : controller.getCurrentHeight());
+      
+      if (height < sitHeight) {
+        setDeskHeight(sitHeight);
+      } else if (height < standHeight) {
+        setDeskHeight(standHeight);
+      } else if (height < controllerParams.maxHeight) {
+        setDeskHeight(controllerParams.maxHeight);
+      }
+      break;
     }
   }
-  if (downDebouncer.read() == LOW && downSwitchChanged) {
-    if (!controller.isDriving()) {
-      const double targetHeight = controller.getTargetHeight();
-      
-      if (targetHeight == sitHeight) {
-        setMinDeskHeight();
-      } else if (targetHeight == standHeight) {
-        setSitDeskHeight();
-      } else if (targetHeight == controllerParams.maxHeight) {
-        setStandDeskHeight();
-      }
-    } else if (controller.isDrivingUp()) {
+  
+  if (downChanged && down) {
+    switch (controller.getDrivingDirection()) {
+    case UP:
       stopDesk();
+      break;
+      
+    case NONE:
+      const double height = (controller.isAtTargetHeight() ? controller.getTargetHeight() : controller.getCurrentHeight());
+      
+      if (height > standHeight) {
+        setDeskHeight(standHeight);
+      } else if (height > sitHeight) {
+        setDeskHeight(sitHeight);
+      } else if (height > controllerParams.minHeight) {
+        setDeskHeight(controllerParams.minHeight);
+      }
+      break;
     }
   }
   
   digitalWrite(syncLedPin, timeStatus() == timeSet ? HIGH : LOW);
   digitalWrite(statusLedPin, controller.isDriving() || upDebouncer.read() == LOW || downDebouncer.read() == LOW ? HIGH : LOW);
   
+  // Alarm.delay() instead of built-in delay(), so that alarms are processed timely.
   Alarm.delay(30);
 }
 
@@ -141,63 +158,89 @@ time_t requestSync()
 
 void processSyncMessage() {
   if (Serial.read() == TIME_HEADER[0]) {
-    const boolean firstTimeInit = (timeStatus() == timeNotSet);
+    const boolean firstTime = (timeStatus() == timeNotSet);
     
     setTime(Serial.parseInt());
     
-    if (firstTimeInit) {
-      digitalClockDisplay();
-      Serial.println("Time set, setting alarms:");
+    if (firstTime) {
+      printDateTime(Serial);
+      Serial.println(" Time synced, setting alarms:");
       
-      setupAlarm(8, 15, setStandDeskHeight);
-      setupAlarm(8, 40, setSitDeskHeight);
-      setupAlarm(9, 20, setStandDeskHeight);
-      setupAlarm(9, 45, setSitDeskHeight);
+      // 25 stå, 25-35 sitta
+      setupAlarm( 8, 25, setSitDeskHeight);    // 25
+      setupAlarm(10, 25, setSitDeskHeight);    // 25
+      setupAlarm(13, 10, setSitDeskHeight);    // 35
+      setupAlarm(15, 25, setSitDeskHeight);    // 35
+      Serial.println();
       
-      setupAlarm(10, 30, setStandDeskHeight);
-      setupAlarm(10, 55, setSitDeskHeight);
-      setupAlarm(11, 20, setStandDeskHeight);
-      setupAlarm(11, 45, setSitDeskHeight);
+      setupAlarm( 8, 50, setStandDeskHeight);  // 25
+      setupAlarm(10, 50, setStandDeskHeight);  // 25
+      setupAlarm(13, 45, setStandDeskHeight);  // 25
+      setupAlarm(16,  0, setStandDeskHeight);  // 25
+      Serial.println();
       
-      setupAlarm(13, 20, setStandDeskHeight);
-      setupAlarm(13, 45, setSitDeskHeight);
-      setupAlarm(14, 20, setStandDeskHeight);
-      setupAlarm(14, 45, setSitDeskHeight);
+      setupAlarm( 9, 15, setSitDeskHeight);    // 30
+      setupAlarm(11, 15, setSitDeskHeight);    // 30 + 1h lunch
+      setupAlarm(14, 10, setSitDeskHeight);    // 35
+      setupAlarm(16, 25, setSitDeskHeight);    // 35
+      Serial.println();
       
-      setupAlarm(15, 25, setStandDeskHeight);
-      setupAlarm(15, 50, setSitDeskHeight);
-      setupAlarm(16, 15, setStandDeskHeight);
-      setupAlarm(16, 40, setSitDeskHeight);
+      setupAlarm( 9, 45, setStandDeskHeight);  // 25 + 15 fika
+      setupAlarm(12, 45, setStandDeskHeight);  // 25
+      setupAlarm(14, 45, setStandDeskHeight);  // 25 + 15 fika
+      setupAlarm(17,  0, setStandDeskHeight);  // 
+      Serial.println();
     } else {
-      digitalClockDisplay();
-      Serial.println("Time updated");
+      printDateTime(Serial);
+      Serial.println(" Time synced");
     }
   }
 }
 
-void digitalClockDisplay() {
-  // digital clock display of the time
-  Serial.print(year());
-  Serial.print("-");
-  printDigits(month());
-  Serial.print("-");
-  printDigits(day());
-  Serial.print(" ");
-  printDigits(hour());
-  Serial.print(":");
-  printDigits(minute());
-  Serial.print(":");
-  printDigits(second());
-  Serial.print(" ");
-}
-
-void printDigits(int digits) {
-  if(digits < 10) {
-    Serial.print('0');
+void printDateTime(Print& print, const time_t& time) {
+  if (time != dtINVALID_TIME) {
+    print.print(year(time));
+    print.print("-");
+    printDigits(print, month(time));
+    print.print("-");
+    printDigits(print, day(time));
+    print.print(" ");
+    printDigits(print, hour(time));
+    print.print(":");
+    printDigits(print, minute(time));
+    print.print(":");
+    printDigits(print, second(time));
+  } else {
+    print.print("                   ");
   }
-  Serial.print(digits);
 }
-
+void printDateTime(Print& print) {
+  if (timeStatus() != timeNotSet) {
+    printDateTime(print, now());
+  } else {
+    print.print("xxxx-xx-xx --:--:--");
+  }
+}
+void printDigits(Print& print, int digits) {
+  if(digits < 10) {
+    print.print('0');
+  }
+  print.print(digits);
+}
+void printLength(Print& print, const double& length) {
+  if (length == sitHeight) {
+    print.print("Sit   ");
+  } else if (length == standHeight) {
+    print.print("Stand ");
+  } else if (length == controllerParams.minHeight) {
+    print.print("Min   ");
+  } else if (length == controllerParams.maxHeight) {
+    print.print("Max   ");
+  } else {
+    print.print(length, 2);
+    print.print(" m");
+  }
+}
 
 void setupDebouncer(Bounce& debouncer, const int& pin) {
   pinMode(pin, INPUT_PULLUP);
@@ -206,10 +249,10 @@ void setupDebouncer(Bounce& debouncer, const int& pin) {
 }
 
 void stopDesk() {
-  digitalClockDisplay();
-  Serial.print("Stopping at height ");
-  Serial.print(controller.getCurrentHeight(), 3);
-  Serial.println(" m");
+  printDateTime(Serial);
+  Serial.print(" Stopped at: ");
+  printLength(Serial, controller.getCurrentHeight());
+  Serial.println();
   
   controller.stopDrive();
   
@@ -219,23 +262,23 @@ void stopDesk() {
 }
 
 void setDeskHeight(const double& targetHeight) {
-  digitalClockDisplay();
-  Serial.print("Setting new height ");
-  Serial.print(targetHeight, 3);
-  Serial.println(" m");
+  printDateTime(Serial);
+  Serial.print(" Driving to: ");
+  printLength(Serial, targetHeight);
+  Serial.println();
   
   controller.setHeight(targetHeight);
   
   if (controller.isEnabled() && !controller.isAtTargetHeight()) {
+    printDateTime(Serial);
+    Serial.print(" Saving height: ");
+    printLength(Serial, targetHeight);
+    Serial.println();
+    
     EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, targetHeight);
   }
 }
-
-void setMinDeskHeight() { setDeskHeight(controllerParams.minHeight); }
-
 void setSitDeskHeight() { setDeskHeight(sitHeight); }
-
 void setStandDeskHeight() { setDeskHeight(standHeight); }
 
-void setMaxDeskHeight() { setDeskHeight(controllerParams.maxHeight); }
 
