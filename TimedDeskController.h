@@ -8,7 +8,7 @@
 
 class TimedDeskController : public BaseDeskController {
 public:
-  TimedDeskController(const int& upPin, const int& downPin);
+  TimedDeskController(const BaseDeskControllerParams& params);
   
   double getCurrentTimeDiff() const;
   

@@ -2,9 +2,8 @@
 #include "TimedDeskController.h"
 
 
-TimedDeskController::TimedDeskController(const int& upPin, const int& downPin)
-    : BaseDeskController(upPin, downPin) {
-}
+TimedDeskController::TimedDeskController(const BaseDeskControllerParams& params)
+    : BaseDeskController(params) {}
 
 double TimedDeskController::getCurrentTimeDiff() const {
   if (isDriving()) {

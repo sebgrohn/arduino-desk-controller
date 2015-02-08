@@ -2,13 +2,23 @@
 #include "HeightDeskController.h"
 
 
-DeskControllerParams::DeskControllerParams(const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed)
-    : minHeight(min(minHeight, maxHeight)), maxHeight(max(minHeight, maxHeight)), upSpeed(upSpeed), downSpeed(downSpeed) {
-}
+HeightDeskControllerParams::HeightDeskControllerParams() {}
 
-double DeskControllerParams::getHeightDiff() const { return maxHeight - minHeight; }
+HeightDeskControllerParams::HeightDeskControllerParams(const char& upPin, const char& downPin)
+    : BaseDeskControllerParams(upPin, downPin) {}
 
-double DeskControllerParams::getTimeForHeightDiff(const double& heightDiff) const {
+HeightDeskControllerParams::HeightDeskControllerParams(
+  const char& upPin, const char& downPin,
+  const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed)
+    : BaseDeskControllerParams(upPin, downPin),
+      minHeight(min(minHeight, maxHeight)),
+      maxHeight(max(minHeight, maxHeight)),
+      upSpeed(upSpeed),
+      downSpeed(downSpeed) {}
+
+double HeightDeskControllerParams::getHeightDiff() const { return maxHeight - minHeight; }
+
+double HeightDeskControllerParams::getTimeIntervalForHeightDiff(const double& heightDiff) const {
   if (heightDiff > 0) {
     return heightDiff / upSpeed;
   } else if (heightDiff < 0) {
@@ -18,17 +28,17 @@ double DeskControllerParams::getTimeForHeightDiff(const double& heightDiff) cons
   }
 }
 
-double DeskControllerParams::getTimeForFullHeightDiff(const DeskDrivingDirection& direction) const {
-  return getTimeForHeightDiff(int(direction) * getHeightDiff());
+double HeightDeskControllerParams::getTimeIntervalForFullHeightDiff(const DeskDrivingDirection& direction) const {
+  return getTimeIntervalForHeightDiff(int(direction) * getHeightDiff());
 }
 
-double DeskControllerParams::getHeightDiffForTime(const double& timeDiff, const DeskDrivingDirection& direction) const {
+double HeightDeskControllerParams::getHeightDiffForTimeInterval(const double& timeInterval, const DeskDrivingDirection& direction) const {
   switch (direction) {
   case UP:
-    return upSpeed * timeDiff;
+    return upSpeed * timeInterval;
     
   case DOWN:
-    return -downSpeed * timeDiff;
+    return -downSpeed * timeInterval;
     
   case NONE:
     return 0;
@@ -36,8 +46,9 @@ double DeskControllerParams::getHeightDiffForTime(const double& timeDiff, const 
 }
 
 
-HeightDeskController::HeightDeskController(const DeskControllerParams& params, const int& upPin, const int& downPin, const double& initialHeight)
-    : BaseDeskController(upPin, downPin), params(params) {
+HeightDeskController::HeightDeskController(const HeightDeskControllerParams& params, const double& initialHeight)
+    : BaseDeskController(params),
+      params(params) {
   lastStoppedHeight = constrain(initialHeight, params.minHeight, params.maxHeight);
   targetHeight      = lastStoppedHeight;
 }
@@ -45,15 +56,15 @@ HeightDeskController::HeightDeskController(const DeskControllerParams& params, c
 double HeightDeskController::getTargetHeight() const { return targetHeight; }
 
 double HeightDeskController::getCurrentHeight() const {
-  const double timeDiff = (millis() - startDrivingTime) / double(1000);
-  const double currentHeight = lastStoppedHeight + params.getHeightDiffForTime(timeDiff, getDrivingDirection());
+  const double timeInterval = (millis() - startDrivingTime) / double(1000);
+  const double currentHeight = lastStoppedHeight + params.getHeightDiffForTimeInterval(timeInterval, getDrivingDirection());
   return constrain(currentHeight, params.minHeight, params.maxHeight);
 }
 
 boolean HeightDeskController::isAtTargetHeight() const {
   if (targetHeight == params.minHeight || targetHeight == params.maxHeight) {
-    const double timeDiff = (millis() - startDrivingTime) / double(1000);
-    return timeDiff >= params.getTimeForFullHeightDiff(getDrivingDirection()) * 1.5;
+    const double timeInterval = (millis() - startDrivingTime) / double(1000);
+    return timeInterval >= params.getTimeIntervalForFullHeightDiff(getDrivingDirection()) * 1.5;
   } else {
     return abs(targetHeight - getCurrentHeight()) <= HEIGHT_DIFF_TOLERANCE;
   }

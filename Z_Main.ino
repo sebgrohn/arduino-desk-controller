@@ -1,31 +1,35 @@
 
-const DeskControllerParams controllerParams(0.685, 1.175, 0.0304, 0.0325);
+const double minHeight   = 0.685;  // in meters
+const double maxHeight   = 1.175;  // in meters
+const double sitHeight   = 0.700;  // in meters
+const double standHeight = 1.110;  // in meters
 
-const double sitHeight   = 0.70;  // in meters
-const double standHeight = 1.11;  // in meters
+const char enableInputPin = 4;
+const char upInputPin     = 3;
+const char downInputPin   = 2;
 
-const int enableInputPin = 4;
-const int upInputPin     = 3;
-const int downInputPin   = 2;
-const int upControlPin   = 7;
-const int downControlPin = 6;
-const int statusLedPin   = 5;
-const int syncLedPin     = LED_BUILTIN;
+const char upControlPin   = 7;
+const char downControlPin = 6;
+const char statusLedPin   = 5;
+const char syncLedPin     = LED_BUILTIN;
 
-const String TIME_HEADER = "T";  // header tag for serial time sync message
-const int TIME_REQUEST = 7;      // ASCII bell character requests a time sync message
+const String TIME_HEADER  = "T";  // header tag for serial time sync message
+const char   TIME_REQUEST = 7;    // ASCII bell character requests a time sync message
 
-const int CURRENT_HEIGHT_EEPROM_ADDRESS = 0;
+const char CURRENT_HEIGHT_EEPROM_ADDRESS = 0;
 
 Bounce enableDebouncer = Bounce();
 Bounce upDebouncer     = Bounce();
 Bounce downDebouncer   = Bounce();
 
 double initialHeight;
-const int ign = EEPROM_readAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, initialHeight);
+const int ignored = EEPROM_readAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, initialHeight);
 
-//TimedDeskController controller2(upControlPin, downControlPin);
-HeightDeskController controller(controllerParams, upControlPin, downControlPin, initialHeight);
+const HeightDeskControllerParams controllerParams(
+  upControlPin, downControlPin,
+  minHeight, maxHeight, 0.0295, 0.0335);
+//TimedDeskController controller2(controllerParams);
+HeightDeskController controller(controllerParams, !isnan(initialHeight) ? initialHeight : controllerParams.minHeight);
 
 void setupAlarm(const int& hours, const int& minutes, void (*function)()) {
   boolean success = true;

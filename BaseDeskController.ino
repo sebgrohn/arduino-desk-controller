@@ -2,10 +2,17 @@
 #include "BaseDeskController.h"
 
 
-BaseDeskController::BaseDeskController(const int& upPin, const int& downPin)
-    : upPin(upPin), downPin(downPin) {
-  pinMode(upPin, OUTPUT);
-  pinMode(downPin, OUTPUT);
+BaseDeskControllerParams::BaseDeskControllerParams() {}
+
+BaseDeskControllerParams::BaseDeskControllerParams(const char& upPin, const char& downPin)
+    : upPin(upPin),
+      downPin(downPin) {}
+
+
+BaseDeskController::BaseDeskController(const BaseDeskControllerParams& params)
+    : params(params) {
+  pinMode(params.upPin, OUTPUT);
+  pinMode(params.downPin, OUTPUT);
   
   enabled = true;
 }
@@ -36,21 +43,21 @@ void BaseDeskController::startDrive(const DeskDrivingDirection& direction) {
   switch (direction) {
   case UP:
     drivingDirection = UP;
-    digitalWrite(downPin, LOW);
-    digitalWrite(upPin, HIGH);
+    digitalWrite(params.downPin, LOW);
+    digitalWrite(params.upPin,   HIGH);
     break;
     
   case DOWN:
     drivingDirection = DOWN;
-    digitalWrite(upPin, LOW);
-    digitalWrite(downPin, HIGH);
+    digitalWrite(params.upPin,   LOW);
+    digitalWrite(params.downPin, HIGH);
     break;
   }
 }
 
 void BaseDeskController::stopDrive() {
-  digitalWrite(upPin, LOW);
-  digitalWrite(downPin, LOW);
+  digitalWrite(params.upPin,   LOW);
+  digitalWrite(params.downPin, LOW);
   drivingDirection = NONE;
 }
 

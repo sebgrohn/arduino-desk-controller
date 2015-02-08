@@ -6,7 +6,7 @@
 #include "BaseDeskController.h"
 
 
-struct DeskControllerParams {
+struct HeightDeskControllerParams : public BaseDeskControllerParams {
 
   /// The lowest possible height of the desk, in m.
   double minHeight;
@@ -20,23 +20,29 @@ struct DeskControllerParams {
   // The speed with which the desk is lowered, in m/s.
   double downSpeed;
   
-  DeskControllerParams(const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed);
+  HeightDeskControllerParams();
+  
+  HeightDeskControllerParams(const char& upPin, const char& downPin);
+  
+  HeightDeskControllerParams(
+    const char& upPin, const char& downPin,
+    const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed);
   
   double getHeightDiff() const;
   
-  double getTimeForHeightDiff(const double& heightDiff) const;
+  double getTimeIntervalForHeightDiff(const double& heightDiff) const;
   
-  double getTimeForFullHeightDiff(const DeskDrivingDirection& direction) const;
+  double getTimeIntervalForFullHeightDiff(const DeskDrivingDirection& direction) const;
   
-  double getHeightDiffForTime(const double& timeDiff, const DeskDrivingDirection& direction) const;
+  double getHeightDiffForTimeInterval(const double& timeInterval, const DeskDrivingDirection& direction) const;
 };
 
 
 class HeightDeskController : public BaseDeskController {
 public:
-  const DeskControllerParams params;
+  const HeightDeskControllerParams params;
   
-  HeightDeskController(const DeskControllerParams& params, const int& upPin, const int& downPin, const double& initialHeight);
+  HeightDeskController(const HeightDeskControllerParams& params, const double& initialHeight);
   
   double getTargetHeight() const;
   

@@ -11,12 +11,21 @@ enum DeskDrivingDirection {
 };
 
 
+struct BaseDeskControllerParams {
+  char upPin;
+  char downPin;
+  
+  BaseDeskControllerParams();
+  
+  BaseDeskControllerParams(const char& upPin, const char& downPin);
+};
+
+
 class BaseDeskController {
 public:
-  const int upPin;
-  const int downPin;
+  const BaseDeskControllerParams params;
   
-  BaseDeskController(const int& upPin, const int& downPin);
+  BaseDeskController(const BaseDeskControllerParams& params);
   
   boolean isEnabled() const;
   
