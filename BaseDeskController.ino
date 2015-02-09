@@ -17,6 +17,8 @@ BaseDeskController::BaseDeskController(const BaseDeskControllerParams& params)
   enabled = true;
 }
 
+BaseDeskController::~BaseDeskController() {}
+
 boolean BaseDeskController::isEnabled() const { return enabled; }
 
 DeskDrivingDirection BaseDeskController::getDrivingDirection() const {return drivingDirection; }

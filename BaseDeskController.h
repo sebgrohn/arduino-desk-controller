@@ -27,6 +27,8 @@ public:
   
   BaseDeskController(const BaseDeskControllerParams& params);
   
+  virtual ~BaseDeskController();
+  
   boolean isEnabled() const;
   
   DeskDrivingDirection getDrivingDirection() const;

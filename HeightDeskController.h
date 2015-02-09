@@ -44,6 +44,8 @@ public:
   
   HeightDeskController(const HeightDeskControllerParams& params, const double& initialHeight);
   
+  virtual ~HeightDeskController();
+  
   double getTargetHeight() const;
   
   double getCurrentHeight() const;

@@ -53,6 +53,8 @@ HeightDeskController::HeightDeskController(const HeightDeskControllerParams& par
   targetHeight      = lastStoppedHeight;
 }
 
+HeightDeskController::~HeightDeskController() {}
+
 double HeightDeskController::getTargetHeight() const { return targetHeight; }
 
 double HeightDeskController::getCurrentHeight() const {

@@ -10,6 +10,8 @@ class TimedDeskController : public BaseDeskController {
 public:
   TimedDeskController(const BaseDeskControllerParams& params);
   
+  virtual ~TimedDeskController();
+  
   double getCurrentTimeDiff() const;
   
   void startDriveTime(const double& newTimeDiff, const DeskDrivingDirection& direction);

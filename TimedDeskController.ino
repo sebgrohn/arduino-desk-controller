@@ -13,6 +13,8 @@ double TimedDeskController::getCurrentTimeDiff() const {
   }
 }
 
+TimedDeskController::~TimedDeskController() {}
+
 void TimedDeskController::startDriveTime(const double& newTimeDiff, const DeskDrivingDirection& direction) {
   targetTimeDiff = max(newTimeDiff, 0);
   
