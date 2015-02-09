@@ -8,13 +8,60 @@ const char enableInputPin = 4;
 const char upInputPin     = 3;
 const char downInputPin   = 2;
 
+const char lcdRSPin      = 8;
+const char lcdEnablePin  = 9;
+const char lcdDataPins[] = { 10, 11, 12, 13 };  // data pin 4-7
+
 const char upControlPin   = 7;
 const char downControlPin = 6;
 const char statusLedPin   = 5;
-const char syncLedPin     = LED_BUILTIN;
 
 const String TIME_HEADER  = "T";  // header tag for serial time sync message
 const char   TIME_REQUEST = 7;    // ASCII bell character requests a time sync message
+
+const char lcdNumCols = 16;
+const char lcdNumRows = 2;
+
+const byte DRIVE_DOWN_CHAR = 0;
+const byte DRIVE_UP_CHAR   = 1;
+const byte DRIVE_STOP_CHAR = 2;
+const byte DRIVE_OK_CHAR   = 3;
+byte DRIVE_DOWN_CHAR_DEFINITION[8] = {
+  B00000,
+  B10000,
+  B01001,
+  B00101,
+  B00011,
+  B01111,
+  B00000,
+};
+byte DRIVE_UP_CHAR_DEFINITION[8] = {
+  B00000,
+  B01111,
+  B00011,
+  B00101,
+  B01001,
+  B10000,
+  B00000,
+};
+byte DRIVE_STOP_CHAR_DEFINITION[8] = {
+  B00000,
+  B01110,
+  B10011,
+  B10101,
+  B11001,
+  B01110,
+  B00000,
+};
+byte DRIVE_OK_CHAR_DEFINITION[8] = {
+  B00000,
+  B01110,
+  B10001,
+  B10001,
+  B10001,
+  B01110,
+  B00000,
+};
 
 const char CURRENT_HEIGHT_EEPROM_ADDRESS = 0;
 
@@ -30,6 +77,8 @@ const HeightDeskControllerParams controllerParams(
   minHeight, maxHeight, 0.0295, 0.0335);
 //TimedDeskController controller2(controllerParams);
 HeightDeskController controller(controllerParams, !isnan(initialHeight) ? initialHeight : controllerParams.minHeight);
+
+LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
 
 void setupAlarm(const int& hours, const int& minutes, void (*function)()) {
   const boolean success = (Alarm.alarmRepeat(hours, minutes, 0, function) != dtINVALID_ALARM_ID);
@@ -61,7 +110,13 @@ void setup()  {
   setupDebouncer(downDebouncer, downInputPin);
   
   pinMode(statusLedPin, OUTPUT);
-  pinMode(syncLedPin, OUTPUT);
+  
+  lcd.createChar(DRIVE_DOWN_CHAR, DRIVE_DOWN_CHAR_DEFINITION);
+  lcd.createChar(DRIVE_UP_CHAR,   DRIVE_UP_CHAR_DEFINITION);
+  lcd.createChar(DRIVE_STOP_CHAR, DRIVE_STOP_CHAR_DEFINITION);
+  lcd.createChar(DRIVE_OK_CHAR,   DRIVE_OK_CHAR_DEFINITION);
+  lcd.begin(lcdNumCols, lcdNumRows);
+  lcd.clear();
   
   controller.setEnabled(enableDebouncer.read() == LOW);
 }
@@ -142,8 +197,9 @@ void loop()  {
     }
   }
   
-  digitalWrite(syncLedPin, timeStatus() == timeSet ? HIGH : LOW);
   digitalWrite(statusLedPin, controller.isDriving() || upDebouncer.read() == LOW || downDebouncer.read() == LOW ? HIGH : LOW);
+  
+  refreshDisplay(lcd);
   
   // Alarm.delay() instead of built-in delay(), so that alarms are processed timely.
   Alarm.delay(30);
@@ -221,6 +277,22 @@ void printDateTime(Print& print) {
     print.print("xxxx-xx-xx --:--:--");
   }
 }
+void printTimeShort(Print& print, const time_t& time) {
+  if (time != dtINVALID_TIME) {
+    printDigits(print, hour(time));
+    print.print(":");
+    printDigits(print, minute(time));
+  } else {
+    print.print("     ");
+  }
+}
+void printTimeShort(Print& print) {
+  if (timeStatus() != timeNotSet) {
+    printTimeShort(print, now());
+  } else {
+    print.print("--:--");
+  }
+}
 void printDigits(Print& print, int digits) {
   if(digits < 10) {
     print.print('0');
@@ -282,3 +354,54 @@ void setSitDeskHeight() { setDeskHeight(sitHeight); }
 void setStandDeskHeight() { setDeskHeight(standHeight); }
 
 
+void refreshDisplay(LiquidCrystal& lcd) {
+  // current time
+  lcd.setCursor(0, 0);
+  printTimeShort(lcd);
+  
+  // enabled/disabled indicator
+  lcd.setCursor(15, 0);
+  lcd.write(controller.isEnabled() ? DRIVE_OK_CHAR : DRIVE_STOP_CHAR);
+  
+  // next alarm time
+  if (timeStatus() != timeNotSet) {
+    lcd.setCursor(9, 0);
+    printTimeShort(lcd, Alarm.getNextTrigger());
+  } else {
+    lcd.setCursor(9, 0);
+    lcd.print("     ");
+  }
+  
+  // current height, driving direction, target height
+  if (controller.isAtTargetHeight()) {
+    lcd.setCursor(0, 1);
+    printLength(lcd, controller.getTargetHeight());
+    
+    lcd.setCursor(7, 1);
+    lcd.print("        ");
+  } else {
+    // current height
+    lcd.setCursor(0, 1);
+    printLength(lcd, controller.getCurrentHeight());
+    
+    // driving direction
+    lcd.setCursor(7, 1);
+    switch(controller.getDrivingDirection()) {
+    case UP:
+      lcd.write(DRIVE_UP_CHAR);
+      break;
+    
+    case NONE:
+      lcd.write(DRIVE_STOP_CHAR);
+      break;
+    
+    case DOWN:
+      lcd.write(DRIVE_DOWN_CHAR);
+      break;
+    }
+    
+    // target height
+    lcd.setCursor(9, 1);
+    printLength(lcd, controller.getTargetHeight());
+  }
+}
