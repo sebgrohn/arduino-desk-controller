@@ -60,9 +60,7 @@ public:
   
   virtual void setEnabled(const boolean& newEnabled);
   
-  virtual void startDrive(const DeskDrivingDirection& direction);
-  
-  virtual void stopDrive();
+  virtual void setDrivingDirection(const DeskDrivingDirection& direction);
   
 private:
   static const double HEIGHT_DIFF_TOLERANCE = 0.001;

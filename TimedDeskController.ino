@@ -15,13 +15,13 @@ double TimedDeskController::getCurrentTimeDiff() const {
 
 TimedDeskController::~TimedDeskController() {}
 
-void TimedDeskController::startDriveTime(const double& newTimeDiff, const DeskDrivingDirection& direction) {
-  targetTimeDiff = max(newTimeDiff, 0);
+void TimedDeskController::setDriveTimeInterval(const double& newTimeInterval, const DeskDrivingDirection& direction) {
+  targetTimeInterval = max(newTimeInterval, 0.0);
   
   if (shouldStop()) {
     stopDrive();
   } else {
-    startDrive(direction);
+    setDrivingDirection(direction);
   }
 }
 
@@ -34,16 +34,23 @@ boolean TimedDeskController::update() {
   }
 }
 
-void TimedDeskController::startDrive(const DeskDrivingDirection& direction) {
-  if (!isEnabled()) {
+void TimedDeskController::setDrivingDirection(const DeskDrivingDirection& newDrivingDirection) {
+  if (newDrivingDirection != NONE && !isEnabled()) {
     return;
   }
   
   const DeskDrivingDirection drivingDirection = getDrivingDirection();
-  switch (direction) {
+  
+  switch (newDrivingDirection) {
   case UP:
     if (drivingDirection != UP) {
       startDrivingTime = millis();
+    }
+    break;
+    
+  case NONE:
+    if (drivingDirection != NONE) {
+      stopDrivingTime = millis();
     }
     break;
     
@@ -53,16 +60,12 @@ void TimedDeskController::startDrive(const DeskDrivingDirection& direction) {
     }
     break;
   }
-  BaseDeskController::startDrive(direction);
-}
-
-void TimedDeskController::stopDrive() {
-  stopDrivingTime = millis();
-  BaseDeskController::stopDrive();
+  
+  BaseDeskController::setDrivingDirection(newDrivingDirection);
 }
 
 boolean TimedDeskController::shouldStop() const {
-  const double timeDiff = (millis() - startDrivingTime) / double(1000);
-  return timeDiff >= targetTimeDiff;
+  const double timeInterval = (millis() - startDrivingTime) / double(1000);
+  return timeInterval >= targetTimeInterval;
 }
 

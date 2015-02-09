@@ -34,16 +34,16 @@ public:
   DeskDrivingDirection getDrivingDirection() const;
   
   boolean isDriving() const;
-  
   boolean isDrivingUp() const;
-  
   boolean isDrivingDown() const;
   
   virtual void setEnabled(const boolean& newEnabled);
   
-  virtual void startDrive(const DeskDrivingDirection& direction);
+  virtual void setDrivingDirection(const DeskDrivingDirection& direction);
   
-  virtual void stopDrive();
+  void startDriveUp();
+  void startDriveDown();
+  void stopDrive();
   
 private:
   boolean enabled;

@@ -84,9 +84,9 @@ void HeightDeskController::resumeDrive() {
   } else {
     const double& currentHeight = getCurrentHeight();
     if (targetHeight > currentHeight) {
-      startDrive(UP);
+      startDriveUp();
     } else if (targetHeight < currentHeight) {
-      startDrive(DOWN);
+      startDriveDown();
     }
   }
 }
@@ -108,20 +108,26 @@ void HeightDeskController::setEnabled(const boolean& newEnabled) {
   }
 }
 
-void HeightDeskController::startDrive(const DeskDrivingDirection& direction) {
-  if (!isEnabled()) {
+void HeightDeskController::setDrivingDirection(const DeskDrivingDirection& newDrivingDirection) {
+  if (newDrivingDirection != NONE && !isEnabled()) {
     return;
   }
   
   const DeskDrivingDirection drivingDirection = getDrivingDirection();
-  switch (direction) {
+  
+  switch (newDrivingDirection) {
   case UP:
     if (drivingDirection == DOWN) {
       lastStoppedHeight = getCurrentHeight();
     }
-    
     if (drivingDirection != UP) {
       startDrivingTime = millis();
+    }
+    break;
+    
+  case NONE:
+    if (drivingDirection != NONE) {
+      lastStoppedHeight = getCurrentHeight();
     }
     break;
     
@@ -129,17 +135,12 @@ void HeightDeskController::startDrive(const DeskDrivingDirection& direction) {
     if (drivingDirection == UP) {
       lastStoppedHeight = getCurrentHeight();
     }
-    
     if (drivingDirection != DOWN) {
       startDrivingTime = millis();
     }
     break;
   }
-  BaseDeskController::startDrive(direction);
-}
-
-void HeightDeskController::stopDrive() {
-  lastStoppedHeight = getCurrentHeight();
-  BaseDeskController::stopDrive();
+  
+  BaseDeskController::setDrivingDirection(newDrivingDirection);
 }
 

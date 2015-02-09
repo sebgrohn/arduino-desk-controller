@@ -14,16 +14,14 @@ public:
   
   double getCurrentTimeDiff() const;
   
-  void startDriveTime(const double& newTimeDiff, const DeskDrivingDirection& direction);
+  void setDriveTimeInterval(const double& newTimeInterval, const DeskDrivingDirection& direction);
   
   virtual boolean update();
   
-  virtual void startDrive(const DeskDrivingDirection& direction);
-  
-  virtual void stopDrive();
+  virtual void setDrivingDirection(const DeskDrivingDirection& direction);
   
 private:
-  double targetTimeDiff;
+  double targetTimeInterval;
   unsigned long startDrivingTime;
   unsigned long stopDrivingTime;
   

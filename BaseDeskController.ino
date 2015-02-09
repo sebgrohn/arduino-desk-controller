@@ -11,7 +11,7 @@ BaseDeskControllerParams::BaseDeskControllerParams(const char& upPin, const char
 
 BaseDeskController::BaseDeskController(const BaseDeskControllerParams& params)
     : params(params) {
-  pinMode(params.upPin, OUTPUT);
+  pinMode(params.upPin,   OUTPUT);
   pinMode(params.downPin, OUTPUT);
   
   enabled = true;
@@ -23,10 +23,8 @@ boolean BaseDeskController::isEnabled() const { return enabled; }
 
 DeskDrivingDirection BaseDeskController::getDrivingDirection() const {return drivingDirection; }
 
-boolean BaseDeskController::isDriving() const { return drivingDirection != NONE; }
-
-boolean BaseDeskController::isDrivingUp() const { return drivingDirection == UP; }
-
+boolean BaseDeskController::isDriving() const     { return drivingDirection != NONE; }
+boolean BaseDeskController::isDrivingUp() const   { return drivingDirection == UP; }
 boolean BaseDeskController::isDrivingDown() const { return drivingDirection == DOWN; }
 
 void BaseDeskController::setEnabled(const boolean& newEnabled) {
@@ -37,16 +35,22 @@ void BaseDeskController::setEnabled(const boolean& newEnabled) {
   enabled = newEnabled;
 }
 
-void BaseDeskController::startDrive(const DeskDrivingDirection& direction) {
-  if (!enabled) {
+void BaseDeskController::setDrivingDirection(const DeskDrivingDirection& newDrivingDirection) {
+  if (newDrivingDirection != NONE && !enabled) {
     return;
   }
   
-  switch (direction) {
+  switch (newDrivingDirection) {
   case UP:
     drivingDirection = UP;
     digitalWrite(params.downPin, LOW);
     digitalWrite(params.upPin,   HIGH);
+    break;
+    
+  case NONE:
+    digitalWrite(params.upPin,   LOW);
+    digitalWrite(params.downPin, LOW);
+    drivingDirection = NONE;
     break;
     
   case DOWN:
@@ -57,9 +61,7 @@ void BaseDeskController::startDrive(const DeskDrivingDirection& direction) {
   }
 }
 
-void BaseDeskController::stopDrive() {
-  digitalWrite(params.upPin,   LOW);
-  digitalWrite(params.downPin, LOW);
-  drivingDirection = NONE;
-}
+void BaseDeskController::startDriveUp()   { setDrivingDirection(UP); }
+void BaseDeskController::startDriveDown() { setDrivingDirection(DOWN); }
+void BaseDeskController::stopDrive()      { setDrivingDirection(NONE); }
 
