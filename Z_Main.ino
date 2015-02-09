@@ -98,7 +98,7 @@ void setup()  {
   
   printDateTime(Serial);
   Serial.print(" Initial height: ");
-  printLength(Serial, initialHeight);
+  printHeight(Serial, initialHeight);
   Serial.println();
   
   setSyncProvider(requestSync);  //set function to call when sync required
@@ -147,7 +147,7 @@ void loop()  {
       
       printDateTime(Serial);
       Serial.print(" Saving height: ");
-      printLength(Serial, targetHeight);
+      printHeight(Serial, targetHeight);
       Serial.println();
       
       EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, targetHeight);
@@ -253,64 +253,72 @@ void processSyncMessage() {
   }
 }
 
-void printDateTime(Print& print, const time_t& time) {
+void printDateTime(Print& printer, const time_t& time) {
   if (time != dtINVALID_TIME) {
-    print.print(year(time));
-    print.print("-");
-    printDigits(print, month(time));
-    print.print("-");
-    printDigits(print, day(time));
-    print.print(" ");
-    printDigits(print, hour(time));
-    print.print(":");
-    printDigits(print, minute(time));
-    print.print(":");
-    printDigits(print, second(time));
+    printer.print(year(time));
+    printer.print("-");
+    printDigits(printer, month(time));
+    printer.print("-");
+    printDigits(printer, day(time));
+    printer.print(" ");
+    printDigits(printer, hour(time));
+    printer.print(":");
+    printDigits(printer, minute(time));
+    printer.print(":");
+    printDigits(printer, second(time));
   } else {
-    print.print("                   ");
+    printer.print("                   ");
   }
 }
-void printDateTime(Print& print) {
+void printDateTime(Print& printer) {
   if (timeStatus() != timeNotSet) {
-    printDateTime(print, now());
+    printDateTime(printer, now());
   } else {
-    print.print("xxxx-xx-xx --:--:--");
+    printer.print("xxxx-xx-xx --:--:--");
   }
 }
-void printTimeShort(Print& print, const time_t& time) {
+void printTimeShort(Print& printer, const time_t& time) {
   if (time != dtINVALID_TIME) {
-    printDigits(print, hour(time));
-    print.print(":");
-    printDigits(print, minute(time));
+    printDigits(printer, hour(time));
+    printer.print(":");
+    printDigits(printer, minute(time));
   } else {
-    print.print("     ");
+    printer.print("     ");
   }
 }
-void printTimeShort(Print& print) {
+void printTimeShort(Print& printer) {
   if (timeStatus() != timeNotSet) {
-    printTimeShort(print, now());
+    printTimeShort(printer, now());
   } else {
-    print.print("--:--");
+    printer.print("--:--");
   }
 }
-void printDigits(Print& print, int digits) {
+void printDigits(Print& printer, int digits) {
   if(digits < 10) {
-    print.print('0');
+    printer.print('0');
   }
-  print.print(digits);
+  printer.print(digits);
 }
-void printLength(Print& print, const double& length) {
-  if (length == sitHeight) {
-    print.print("Sit   ");
-  } else if (length == standHeight) {
-    print.print("Stand ");
-  } else if (length == controllerParams.minHeight) {
-    print.print("Min   ");
-  } else if (length == controllerParams.maxHeight) {
-    print.print("Max   ");
+
+void printLength(Print& printer, const double& length) {
+  if (!isnan(length)) {
+    printer.print(length, 2);
+    printer.print(" m");
   } else {
-    print.print(length, 2);
-    print.print(" m");
+    printer.print("---- m");
+  }
+}
+void printHeight(Print& printer, const double& height) {
+  if (height == sitHeight) {
+    printer.print("Sit   ");
+  } else if (height == standHeight) {
+    printer.print("Stand ");
+  } else if (height == controllerParams.minHeight) {
+    printer.print("Min   ");
+  } else if (height == controllerParams.maxHeight) {
+    printer.print("Max   ");
+  } else {
+    printLength(printer, height);
   }
 }
 
@@ -323,7 +331,7 @@ void setupDebouncer(Bounce& debouncer, const int& pin) {
 void stopDesk() {
   printDateTime(Serial);
   Serial.print(" Stopped at: ");
-  printLength(Serial, controller.getCurrentHeight());
+  printHeight(Serial, controller.getCurrentHeight());
   Serial.println();
   
   controller.stopDrive();
@@ -336,7 +344,7 @@ void stopDesk() {
 void setDeskHeight(const double& targetHeight) {
   printDateTime(Serial);
   Serial.print(" Driving to: ");
-  printLength(Serial, targetHeight);
+  printHeight(Serial, targetHeight);
   Serial.println();
   
   controller.setHeight(targetHeight);
@@ -344,13 +352,13 @@ void setDeskHeight(const double& targetHeight) {
   if (controller.isEnabled() && !controller.isAtTargetHeight()) {
     printDateTime(Serial);
     Serial.print(" Saving height: ");
-    printLength(Serial, targetHeight);
+    printHeight(Serial, targetHeight);
     Serial.println();
     
     EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, targetHeight);
   }
 }
-void setSitDeskHeight() { setDeskHeight(sitHeight); }
+void setSitDeskHeight()   { setDeskHeight(sitHeight); }
 void setStandDeskHeight() { setDeskHeight(standHeight); }
 
 
@@ -375,14 +383,14 @@ void refreshDisplay(LiquidCrystal& lcd) {
   // current height, driving direction, target height
   if (controller.isAtTargetHeight()) {
     lcd.setCursor(0, 1);
-    printLength(lcd, controller.getTargetHeight());
+    printHeight(lcd, controller.getTargetHeight());
     
     lcd.setCursor(7, 1);
     lcd.print("        ");
   } else {
     // current height
     lcd.setCursor(0, 1);
-    printLength(lcd, controller.getCurrentHeight());
+    printHeight(lcd, controller.getCurrentHeight());
     
     // driving direction
     lcd.setCursor(7, 1);
@@ -402,6 +410,6 @@ void refreshDisplay(LiquidCrystal& lcd) {
     
     // target height
     lcd.setCursor(9, 1);
-    printLength(lcd, controller.getTargetHeight());
+    printHeight(lcd, controller.getTargetHeight());
   }
 }
