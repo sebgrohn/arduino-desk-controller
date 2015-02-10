@@ -4,6 +4,11 @@ const double maxHeight   = 1.175;  // in meters
 const double sitHeight   = 0.700;  // in meters
 const double standHeight = 1.110;  // in meters
 
+const String minPosition   = "Min";
+const String maxPosition   = "Max";
+const String sitPosition   = "Sit";
+const String standPosition = "Stand";
+
 const char enableInputPin = 4;
 const char upInputPin     = 3;
 const char downInputPin   = 2;
@@ -72,11 +77,19 @@ Bounce downDebouncer   = Bounce();
 double initialHeight;
 const int ignored = EEPROM_readAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, initialHeight);
 
-const HeightDeskControllerParams controllerParams(
-  upControlPin, downControlPin,
-  minHeight, maxHeight, 0.0295, 0.0335);
-//TimedDeskController controller2(controllerParams);
-HeightDeskController controller(controllerParams, !isnan(initialHeight) ? initialHeight : controllerParams.minHeight);
+std::map<String, double> createControllerPositions() {
+  std::map<String, double> controllerPositions = std::map<String, double>();
+  controllerPositions[minPosition]   = minHeight;
+  controllerPositions[maxPosition]   = maxHeight;
+  controllerPositions[sitPosition]   = sitHeight;
+  controllerPositions[standPosition] = standHeight;
+  return controllerPositions;
+}
+PositionDeskControllerParams controllerParams(
+    upControlPin, downControlPin,
+    minHeight, maxHeight, 0.0295, 0.0335,
+    createControllerPositions());
+PositionDeskController controller(controllerParams, !isnan(initialHeight) ? initialHeight : controllerParams.minHeight);
 
 LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
 
@@ -88,7 +101,7 @@ void setupAlarm(const int& hours, const int& minutes, void (*function)()) {
   Serial.print(":");
   printDigits(Serial, minutes);
   Serial.print(" ");
-  Serial.print(function != setStandDeskHeight ? (function != setSitDeskHeight ? "?" : "v") : "^");
+  Serial.print(function != setStandDeskPosition ? (function != setSitDeskPosition ? "?" : "v") : "^");
   Serial.print(success ? "" : " FAILED");
 }
 
@@ -142,7 +155,7 @@ void loop()  {
     
     controller.setEnabled(enable);
     
-    if (enable && !controller.isAtTargetHeight()) {
+    if (enable && !controller.isAtTargetPosition()) {
       const double targetHeight = controller.getTargetHeight();
       
       printDateTime(Serial);
@@ -164,14 +177,14 @@ void loop()  {
       break;
       
     case NONE:
-      const double height = (controller.isAtTargetHeight() ? controller.getTargetHeight() : controller.getCurrentHeight());
+      const double height = (controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
       
-      if (height < sitHeight) {
-        setDeskHeight(sitHeight);
-      } else if (height < standHeight) {
-        setDeskHeight(standHeight);
-      } else if (height < controllerParams.maxHeight) {
-        setDeskHeight(controllerParams.maxHeight);
+      if (height < controllerParams.getPositionHeight(sitPosition)) {
+        setDeskPosition(sitPosition);
+      } else if (height < controllerParams.getPositionHeight(standPosition)) {
+        setDeskPosition(standPosition);
+      } else if (height < controllerParams.getPositionHeight(maxPosition)) {
+        setDeskPosition(maxPosition);
       }
       break;
     }
@@ -184,14 +197,14 @@ void loop()  {
       break;
       
     case NONE:
-      const double height = (controller.isAtTargetHeight() ? controller.getTargetHeight() : controller.getCurrentHeight());
+      const double height = (controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
       
-      if (height > standHeight) {
-        setDeskHeight(standHeight);
-      } else if (height > sitHeight) {
-        setDeskHeight(sitHeight);
-      } else if (height > controllerParams.minHeight) {
-        setDeskHeight(controllerParams.minHeight);
+      if (height > controllerParams.getPositionHeight(standPosition)) {
+        setDeskPosition(standPosition);
+      } else if (height > controllerParams.getPositionHeight(sitPosition)) {
+        setDeskPosition(sitPosition);
+      } else if (height > controllerParams.getPositionHeight(minPosition)) {
+        setDeskPosition(minPosition);
       }
       break;
     }
@@ -230,28 +243,28 @@ void processSyncMessage() {
       Serial.println(" Time synced, setting alarms:");
       
       // 25 stå, 25-35 sitta
-      setupAlarm( 8, 25, setSitDeskHeight);    // 25
-      setupAlarm(10, 25, setSitDeskHeight);    // 25
-      setupAlarm(13, 10, setSitDeskHeight);    // 35
-      setupAlarm(15, 25, setSitDeskHeight);    // 35
+      setupAlarm( 8, 25, setSitDeskPosition);    // 25
+      setupAlarm(10, 25, setSitDeskPosition);    // 25
+      setupAlarm(13, 10, setSitDeskPosition);    // 35
+      setupAlarm(15, 25, setSitDeskPosition);    // 35
       Serial.println();
       
-      setupAlarm( 8, 50, setStandDeskHeight);  // 25
-      setupAlarm(10, 50, setStandDeskHeight);  // 25
-      setupAlarm(13, 45, setStandDeskHeight);  // 25
-      setupAlarm(16,  0, setStandDeskHeight);  // 25
+      setupAlarm( 8, 50, setStandDeskPosition);  // 25
+      setupAlarm(10, 50, setStandDeskPosition);  // 25
+      setupAlarm(13, 45, setStandDeskPosition);  // 25
+      setupAlarm(16,  0, setStandDeskPosition);  // 25
       Serial.println();
       
-      setupAlarm( 9, 15, setSitDeskHeight);    // 30
-      setupAlarm(11, 15, setSitDeskHeight);    // 30 + 1h lunch
-      setupAlarm(14, 10, setSitDeskHeight);    // 35
-      setupAlarm(16, 25, setSitDeskHeight);    // 35
+      setupAlarm( 9, 15, setSitDeskPosition);    // 30
+      setupAlarm(11, 15, setSitDeskPosition);    // 30 + 1h lunch
+      setupAlarm(14, 10, setSitDeskPosition);    // 35
+      setupAlarm(16, 25, setSitDeskPosition);    // 35
       Serial.println();
       
-      setupAlarm( 9, 45, setStandDeskHeight);  // 25 + 15 fika
-      setupAlarm(12, 45, setStandDeskHeight);  // 25
-      setupAlarm(14, 45, setStandDeskHeight);  // 25 + 15 fika
-      setupAlarm(17,  0, setStandDeskHeight);  // 
+      setupAlarm( 9, 45, setStandDeskPosition);  // 25 + 15 fika
+      setupAlarm(12, 45, setStandDeskPosition);  // 25
+      setupAlarm(14, 45, setStandDeskPosition);  // 25 + 15 fika
+      setupAlarm(17,  0, setStandDeskPosition);  // 
       Serial.println();
     } else {
       printDateTime(Serial);
@@ -316,14 +329,14 @@ void printLength(Print& printer, const double& length) {
   }
 }
 void printHeight(Print& printer, const double& height) {
-  if (height == sitHeight) {
-    printer.print("Sit   ");
-  } else if (height == standHeight) {
-    printer.print("Stand ");
-  } else if (height == controllerParams.minHeight) {
+  if (height == controllerParams.getPositionHeight(minPosition)) {
     printer.print("Min   ");
-  } else if (height == controllerParams.maxHeight) {
+  } else if (height == controllerParams.getPositionHeight(maxPosition)) {
     printer.print("Max   ");
+  } else if (height == controllerParams.getPositionHeight(sitPosition)) {
+    printer.print("Sit   ");
+  } else if (height == controllerParams.getPositionHeight(standPosition)) {
+    printer.print("Stand ");
   } else {
     printLength(printer, height);
   }
@@ -336,27 +349,36 @@ void setupDebouncer(Bounce& debouncer, const int& pin) {
 }
 
 void stopDesk() {
-  printDateTime(Serial);
-  Serial.print(" Stopped at height: ");
-  printHeight(Serial, controller.getCurrentHeight());
-  Serial.println();
-  
   controller.stopDrive();
   
-  if (controller.isEnabled() && !controller.isAtTargetHeight()) {
-    EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, controller.getCurrentHeight());
+  const double currentHeight = controller.getCurrentHeight();
+  
+  printDateTime(Serial);
+  Serial.print(" Stopped at height: ");
+  printHeight(Serial, currentHeight);
+  Serial.println();
+  
+  if (controller.isEnabled() && !controller.isAtTargetPosition()) {
+    printDateTime(Serial);
+    Serial.print(" Saving height:     ");
+    printHeight(Serial, currentHeight);
+    Serial.println();
+    
+    EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, currentHeight);
   }
 }
 
-void setDeskHeight(const double& targetHeight) {
+void setDeskPosition(const String& targetPosition) {
+  controller.setPosition(targetPosition);
+  
+  const double targetHeight = controller.getTargetHeight();
+  
   printDateTime(Serial);
   Serial.print(" Driving to height: ");
   printHeight(Serial, targetHeight);
   Serial.println();
   
-  controller.setHeight(targetHeight);
-  
-  if (controller.isEnabled() && !controller.isAtTargetHeight()) {
+  if (controller.isEnabled() && !controller.isAtTargetPosition()) {
     printDateTime(Serial);
     Serial.print(" Saving height:     ");
     printHeight(Serial, targetHeight);
@@ -365,8 +387,8 @@ void setDeskHeight(const double& targetHeight) {
     EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, targetHeight);
   }
 }
-void setSitDeskHeight()   { setDeskHeight(sitHeight); }
-void setStandDeskHeight() { setDeskHeight(standHeight); }
+void setSitDeskPosition()   { setDeskPosition(sitPosition); }
+void setStandDeskPosition() { setDeskPosition(standPosition); }
 
 
 void refreshDisplay(LiquidCrystal& lcd) {
@@ -388,7 +410,7 @@ void refreshDisplay(LiquidCrystal& lcd) {
   }
   
   // current height, driving direction, target height
-  if (controller.isAtTargetHeight()) {
+  if (controller.isAtTargetPosition()) {
     lcd.setCursor(0, 1);
     printHeight(lcd, controller.getTargetHeight());
     
