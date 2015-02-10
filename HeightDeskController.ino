@@ -11,8 +11,8 @@ HeightDeskControllerParams::HeightDeskControllerParams(
   const char& upPin, const char& downPin,
   const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed)
     : BaseDeskControllerParams(upPin, downPin),
-      minHeight(min(minHeight, maxHeight)),
-      maxHeight(max(minHeight, maxHeight)),
+      minHeight(std::min(minHeight, maxHeight)),
+      maxHeight(std::max(minHeight, maxHeight)),
       upSpeed(upSpeed),
       downSpeed(downSpeed) {}
 
@@ -67,7 +67,11 @@ boolean HeightDeskController::isAtTargetHeight() const {
     const double timeInterval = (millis() - startDrivingTime) / double(1000);
     return timeInterval >= params.getTimeIntervalForFullHeightDiff(getDrivingDirection()) * 1.5;
   } else {
-    return abs(targetHeight - getCurrentHeight()) <= HEIGHT_DIFF_TOLERANCE;
+    // TODO workaround for abs converting to integer
+    const double heightDiff = targetHeight - getCurrentHeight();
+    return (heightDiff < 0 ? -heightDiff : heightDiff) <= HEIGHT_DIFF_TOLERANCE;
+    
+    //return std::abs(targetHeight - getCurrentHeight()) <= HEIGHT_DIFF_TOLERANCE;
   }
 }
 

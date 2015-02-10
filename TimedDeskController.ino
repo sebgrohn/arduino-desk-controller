@@ -14,7 +14,7 @@ double TimedDeskController::getCurrentTimeDiff() const {
 }
 
 void TimedDeskController::setDriveTimeInterval(const double& newTimeInterval, const DeskDrivingDirection& direction) {
-  targetTimeInterval = max(newTimeInterval, 0.0);
+  targetTimeInterval = std::max(newTimeInterval, 0.0);
   
   if (shouldStop()) {
     stopDrive();
