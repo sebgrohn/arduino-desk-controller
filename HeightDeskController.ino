@@ -53,8 +53,6 @@ HeightDeskController::HeightDeskController(const HeightDeskControllerParams& par
   targetHeight      = lastStoppedHeight;
 }
 
-HeightDeskController::~HeightDeskController() {}
-
 double HeightDeskController::getTargetHeight() const { return targetHeight; }
 
 double HeightDeskController::getCurrentHeight() const {
@@ -65,6 +63,7 @@ double HeightDeskController::getCurrentHeight() const {
 
 boolean HeightDeskController::isAtTargetHeight() const {
   if (targetHeight == params.minHeight || targetHeight == params.maxHeight) {
+    // TODO fel ifall vi inte kör för tillfället
     const double timeInterval = (millis() - startDrivingTime) / double(1000);
     return timeInterval >= params.getTimeIntervalForFullHeightDiff(getDrivingDirection()) * 1.5;
   } else {
@@ -79,7 +78,6 @@ void HeightDeskController::setHeight(const double& newHeight) {
 
 void HeightDeskController::resumeDrive() {
   if (isAtTargetHeight()) {
-    // TODO fel ifall targetHeight == (params.minHeight || params.maxHeight) och vi inte kör för tillfället
     stopDrive();
   } else {
     const double& currentHeight = getCurrentHeight();
