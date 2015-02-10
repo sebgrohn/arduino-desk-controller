@@ -146,7 +146,7 @@ void loop()  {
       const double targetHeight = controller.getTargetHeight();
       
       printDateTime(Serial);
-      Serial.print(" Saving height: ");
+      Serial.print(" Saving height:     ");
       printHeight(Serial, targetHeight);
       Serial.println();
       
@@ -195,6 +195,13 @@ void loop()  {
       }
       break;
     }
+  }
+  
+  if (reachedTargetHeight) {
+      printDateTime(Serial);
+      Serial.print(" Reached height:    ");
+      printHeight(Serial, controller.getTargetHeight());
+      Serial.println();
   }
   
   digitalWrite(statusLedPin, controller.isDriving() || upDebouncer.read() == LOW || downDebouncer.read() == LOW ? HIGH : LOW);
@@ -330,7 +337,7 @@ void setupDebouncer(Bounce& debouncer, const int& pin) {
 
 void stopDesk() {
   printDateTime(Serial);
-  Serial.print(" Stopped at: ");
+  Serial.print(" Stopped at height: ");
   printHeight(Serial, controller.getCurrentHeight());
   Serial.println();
   
@@ -343,7 +350,7 @@ void stopDesk() {
 
 void setDeskHeight(const double& targetHeight) {
   printDateTime(Serial);
-  Serial.print(" Driving to: ");
+  Serial.print(" Driving to height: ");
   printHeight(Serial, targetHeight);
   Serial.println();
   
@@ -351,7 +358,7 @@ void setDeskHeight(const double& targetHeight) {
   
   if (controller.isEnabled() && !controller.isAtTargetHeight()) {
     printDateTime(Serial);
-    Serial.print(" Saving height: ");
+    Serial.print(" Saving height:     ");
     printHeight(Serial, targetHeight);
     Serial.println();
     
