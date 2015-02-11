@@ -25,12 +25,10 @@ public:
     const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed,
     const position_map& positions);
   
-  double getPositionHeight(const String& position) const;
-  
+  double getPositionHeight(const String& name) const;
   String getPositionName(const double& height) const;
   
   void insertPosition(const String& name, const double& height);
-  
   void erasePosition(const String& name);
   
 private:
@@ -50,9 +48,7 @@ public:
   PositionDeskController(const PositionDeskControllerParams& params, const double& initialHeight);
   
   String getTargetPosition() const;
-  
   String getCurrentPosition() const;
-  
   boolean isAtTargetPosition() const;
   
   void setPosition(const String& newPositionName);

@@ -1,6 +1,9 @@
 
 #include "PositionDeskController.h"
 
+#include <limits>
+#include <cmath>
+
 
 PositionDeskControllerParams::PositionDeskControllerParams() {}
 
@@ -18,6 +21,7 @@ PositionDeskControllerParams::PositionDeskControllerParams(
   const position_map& positions)
     : HeightDeskControllerParams(upPin, downPin, minHeight, maxHeight, upSpeed, downSpeed),
       positions(positions) {
+  // TODO validate min/max
   setRevPositions();
 }
 
@@ -26,7 +30,7 @@ double PositionDeskControllerParams::getPositionHeight(const String& name) const
   if (it != positions.end()) {
     return it->second;
   } else {
-    return -1;
+    return std::numeric_limits<double>::quiet_NaN();
   }
 }
 
@@ -40,6 +44,7 @@ String PositionDeskControllerParams::getPositionName(const double& height) const
 }
 
 void PositionDeskControllerParams::insertPosition(const String& name, const double& height) {
+  // TODO validate min/max
   positions[name]      = height;
   revPositions[height] = name;
 }
@@ -53,8 +58,7 @@ void PositionDeskControllerParams::erasePosition(const String& name) {
 void PositionDeskControllerParams::setRevPositions() {
   revPositions.clear();
   
-  position_map::const_iterator it;
-  for (it = positions.begin(); it != positions.end(); it++) {
+  for (position_map::const_iterator it = positions.begin(); it != positions.end(); it++) {
     revPositions[it->second] = it->first;
   }
 }
@@ -79,7 +83,7 @@ boolean PositionDeskController::isAtTargetPosition() const {
 
 void PositionDeskController::setPosition(const String& newPositionName) {
   const double newHeight = params.getPositionHeight(newPositionName);
-  if (newHeight != -1) {
+  if (!isnan(newHeight)) {
     setHeight(newHeight);
   }
 }
