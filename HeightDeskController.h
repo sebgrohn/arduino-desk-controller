@@ -29,12 +29,10 @@ struct HeightDeskControllerParams : public BaseDeskControllerParams {
     const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed);
   
   double getHeightDiff() const;
+  double getHeightDiffForTimeInterval(const double& timeInterval, const DeskDrivingDirection& direction) const;
   
   double getTimeIntervalForHeightDiff(const double& heightDiff) const;
-  
   double getTimeIntervalForFullHeightDiff(const DeskDrivingDirection& direction) const;
-  
-  double getHeightDiffForTimeInterval(const double& timeInterval, const DeskDrivingDirection& direction) const;
 };
 
 
@@ -45,9 +43,7 @@ public:
   HeightDeskController(const HeightDeskControllerParams& params, const double& initialHeight);
   
   double getTargetHeight() const;
-  
   double getCurrentHeight() const;
-  
   boolean isAtTargetHeight() const;
   
   void setHeight(const double& newHeight);

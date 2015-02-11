@@ -1,6 +1,9 @@
 
 #include "HeightDeskController.h"
 
+#include <limits>
+#include <cmath>
+
 
 HeightDeskControllerParams::HeightDeskControllerParams() {}
 
@@ -18,30 +21,31 @@ HeightDeskControllerParams::HeightDeskControllerParams(
 
 double HeightDeskControllerParams::getHeightDiff() const { return maxHeight - minHeight; }
 
+double HeightDeskControllerParams::getHeightDiffForTimeInterval(const double& timeInterval, const DeskDrivingDirection& direction) const {
+  switch (direction) {
+    case UP:   return upSpeed * timeInterval;
+    case NONE: return 0;
+    case DOWN: return -downSpeed * timeInterval;
+  }
+}
+
 double HeightDeskControllerParams::getTimeIntervalForHeightDiff(const double& heightDiff) const {
   if (heightDiff > 0) {
     return heightDiff / upSpeed;
   } else if (heightDiff < 0) {
-    return -heightDiff / downSpeed;
+    return heightDiff / -downSpeed;
   } else {
     return 0;
   }
 }
 
 double HeightDeskControllerParams::getTimeIntervalForFullHeightDiff(const DeskDrivingDirection& direction) const {
-  return getTimeIntervalForHeightDiff(int(direction) * getHeightDiff());
-}
-
-double HeightDeskControllerParams::getHeightDiffForTimeInterval(const double& timeInterval, const DeskDrivingDirection& direction) const {
   switch (direction) {
-  case UP:
-    return upSpeed * timeInterval;
-    
-  case DOWN:
-    return -downSpeed * timeInterval;
-    
   case NONE:
-    return 0;
+    return std::numeric_limits<double>::infinity();
+    
+  default:
+    return getTimeIntervalForHeightDiff(int(direction) * getHeightDiff());
   }
 }
 
@@ -63,7 +67,6 @@ double HeightDeskController::getCurrentHeight() const {
 
 boolean HeightDeskController::isAtTargetHeight() const {
   if (targetHeight == params.minHeight || targetHeight == params.maxHeight) {
-    // TODO fel ifall vi inte kör för tillfället
     const double timeInterval = (millis() - startDrivingTime) / double(1000);
     return timeInterval >= params.getTimeIntervalForFullHeightDiff(getDrivingDirection()) * 1.5;
   } else {
