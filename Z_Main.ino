@@ -4,10 +4,10 @@ const double maxHeight   = 1.175;  // in meters
 const double sitHeight   = 0.700;  // in meters
 const double standHeight = 1.110;  // in meters
 
-const String minPosition   = "Min";
-const String maxPosition   = "Max";
-const String sitPosition   = "Sit";
-const String standPosition = "Stand";
+const String minPosition   = "Min   ";
+const String maxPosition   = "Max   ";
+const String sitPosition   = "Sit   ";
+const String standPosition = "Stand ";
 
 const char enableInputPin = 4;
 const char upInputPin     = 3;
@@ -313,6 +313,36 @@ void printTimeShort(Print& printer) {
     printer.print("--:--");
   }
 }
+void printTimeInterval(Print& printer, const time_t& timeInterval) {
+  time_t timeIntervalRem = timeInterval;
+  const int days  = timeIntervalRem / 86400; timeIntervalRem -= days  * 86400;
+  const int hours = timeIntervalRem / 3600;  timeIntervalRem -= hours * 3600;
+  const int mins  = timeIntervalRem / 60;    timeIntervalRem -= mins  * 60;
+  const int secs  = timeIntervalRem;
+  
+  if (days > 0) {
+    printer.print(days + 1);
+    printer.print(" d   ");
+  } else if (hours > 10) {
+    printer.print(hours + 1);
+    printer.print(" h  ");
+  } else if (hours > 0) {
+    printer.print(mins == 59 ? hours + 1 : hours);
+    printer.print(":");
+    printDigits(printer, (mins + 1) % 60);
+    printer.print(" h");
+  } else if (mins > 0) {
+    printer.print(mins + 1);
+    printer.print(" m   ");
+  } else if (secs > 30) {
+    printer.print("1 m   ");
+  } else if (secs > 10) {
+    printer.print("30 s  ");
+  } else if (secs > 0) {
+    printer.print(secs);
+    printer.print(" s   ");
+  }
+}
 void printDigits(Print& printer, int digits) {
   if(digits < 10) {
     printer.print('0');
@@ -329,14 +359,9 @@ void printLength(Print& printer, const double& length) {
   }
 }
 void printHeight(Print& printer, const double& height) {
-  if (height == controllerParams.getPositionHeight(minPosition)) {
-    printer.print("Min   ");
-  } else if (height == controllerParams.getPositionHeight(maxPosition)) {
-    printer.print("Max   ");
-  } else if (height == controllerParams.getPositionHeight(sitPosition)) {
-    printer.print("Sit   ");
-  } else if (height == controllerParams.getPositionHeight(standPosition)) {
-    printer.print("Stand ");
+  const String positionName = controllerParams.getPositionName(height);
+  if (positionName != String()) {
+    printer.print(positionName);
   } else {
     printLength(printer, height);
   }
@@ -392,53 +417,51 @@ void setStandDeskPosition() { setDeskPosition(standPosition); }
 
 
 void refreshDisplay(LiquidCrystal& lcd) {
+  const time_t currentTime = now();
+  
   // current time
   lcd.setCursor(0, 0);
   printTimeShort(lcd);
   
   // enabled/disabled indicator
-  lcd.setCursor(15, 0);
+  lcd.setCursor(8, 0);
   lcd.write(controller.isEnabled() ? DRIVE_OK_CHAR : DRIVE_STOP_CHAR);
   
   // next alarm time
   if (timeStatus() != timeNotSet) {
-    lcd.setCursor(9, 0);
-    printTimeShort(lcd, Alarm.getNextTrigger());
+    lcd.setCursor(10, 0);
+    printTimeInterval(lcd, Alarm.getNextTrigger() - currentTime);
   } else {
-    lcd.setCursor(9, 0);
-    lcd.print("     ");
+    lcd.setCursor(10, 0);
+    lcd.print("      ");
   }
+  
+  const double currentHeight = controller.getCurrentHeight();
+  const double targetHeight  = controller.getTargetHeight();
   
   // current height, driving direction, target height
   if (controller.isAtTargetPosition()) {
     lcd.setCursor(0, 1);
-    printHeight(lcd, controller.getTargetHeight());
+    printHeight(lcd, targetHeight);
     
     lcd.setCursor(7, 1);
-    lcd.print("        ");
+    lcd.print("         ");
   } else {
     // current height
     lcd.setCursor(0, 1);
-    printHeight(lcd, controller.getCurrentHeight());
+    printHeight(lcd, currentHeight);
     
     // driving direction
     lcd.setCursor(7, 1);
-    switch(controller.getDrivingDirection()) {
-    case UP:
+    if (targetHeight > currentHeight) {
       lcd.write(DRIVE_UP_CHAR);
-      break;
-    
-    case NONE:
-      lcd.write(DRIVE_STOP_CHAR);
-      break;
-    
-    case DOWN:
+    } else {
       lcd.write(DRIVE_DOWN_CHAR);
-      break;
     }
+    lcd.write(controller.isDriving() ? ' ' : DRIVE_STOP_CHAR);
     
     // target height
-    lcd.setCursor(9, 1);
-    printHeight(lcd, controller.getTargetHeight());
+    lcd.setCursor(10, 1);
+    printHeight(lcd, targetHeight);
   }
 }
