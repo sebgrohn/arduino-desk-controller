@@ -89,7 +89,7 @@ PositionDeskControllerParams controllerParams(
     upControlPin, downControlPin,
     minHeight, maxHeight, 0.0295, 0.0335,
     createControllerPositions());
-PositionDeskController controller(controllerParams, !isnan(initialHeight) ? initialHeight : controllerParams.minHeight);
+PositionDeskController controller(controllerParams, !isnan(initialHeight) ? initialHeight : minHeight);
 
 LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
 
@@ -110,8 +110,8 @@ void setup()  {
   Serial.begin(57600);
   
   printDateTime(Serial);
-  Serial.print(" Initial height: ");
-  printHeight(Serial, initialHeight);
+  Serial.print(" Initial height:    ");
+  printHeight(Serial, controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
   Serial.println();
   
   setSyncProvider(requestSync);  //set function to call when sync required
@@ -169,9 +169,6 @@ void loop()  {
   
   if (upChanged && up) {
     switch (controller.getDrivingDirection()) {
-    case UP:
-      break;
-      
     case DOWN:
       stopDesk();
       break;
@@ -179,11 +176,11 @@ void loop()  {
     case NONE:
       const double height = (controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
       
-      if (height < controllerParams.getPositionHeight(sitPosition)) {
+      if (height < controller.params.getPositionHeight(sitPosition)) {
         setDeskPosition(sitPosition);
-      } else if (height < controllerParams.getPositionHeight(standPosition)) {
+      } else if (height < controller.params.getPositionHeight(standPosition)) {
         setDeskPosition(standPosition);
-      } else if (height < controllerParams.getPositionHeight(maxPosition)) {
+      } else if (height < controller.params.getPositionHeight(maxPosition)) {
         setDeskPosition(maxPosition);
       }
       break;
@@ -199,11 +196,11 @@ void loop()  {
     case NONE:
       const double height = (controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
       
-      if (height > controllerParams.getPositionHeight(standPosition)) {
+      if (height > controller.params.getPositionHeight(standPosition)) {
         setDeskPosition(standPosition);
-      } else if (height > controllerParams.getPositionHeight(sitPosition)) {
+      } else if (height > controller.params.getPositionHeight(sitPosition)) {
         setDeskPosition(sitPosition);
-      } else if (height > controllerParams.getPositionHeight(minPosition)) {
+      } else if (height > controller.params.getPositionHeight(minPosition)) {
         setDeskPosition(minPosition);
       }
       break;
@@ -343,7 +340,7 @@ void printTimeInterval(Print& printer, const time_t& timeInterval) {
     printer.print(" s   ");
   }
 }
-void printDigits(Print& printer, int digits) {
+void printDigits(Print& printer, const int& digits) {
   if(digits < 10) {
     printer.print('0');
   }
@@ -359,7 +356,7 @@ void printLength(Print& printer, const double& length) {
   }
 }
 void printHeight(Print& printer, const double& height) {
-  const String positionName = controllerParams.getPositionName(height);
+  const String positionName = controller.params.getPositionName(height);
   if (positionName != String()) {
     printer.print(positionName);
   } else {
