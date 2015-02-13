@@ -25,21 +25,23 @@ PositionDeskControllerParams::PositionDeskControllerParams(
   setRevPositions();
 }
 
-double PositionDeskControllerParams::getPositionHeight(const String& name) const {
+PositionDeskControllerParams::position PositionDeskControllerParams::getPosition(const String& name) const {
   position_map::const_iterator it = positions.find(name);
   if (it != positions.end()) {
-    return it->second;
+    return *it;
   } else {
-    return std::numeric_limits<double>::quiet_NaN();
+    // empty / fail-name
+    return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
   }
 }
 
-String PositionDeskControllerParams::getPositionName(const double& height) const {
+PositionDeskControllerParams::position PositionDeskControllerParams::getPosition(const double& height) const {
   rev_position_map::const_iterator it = revPositions.find(height);
   if (it != revPositions.end()) {
-    return it->second;
+    return std::make_pair(it->second, it->first);
   } else {
-    return String();
+    // empty / fail-height
+    return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
   }
 }
 
@@ -70,11 +72,11 @@ PositionDeskController::PositionDeskController(const PositionDeskControllerParam
 }
 
 String PositionDeskController::getTargetPosition() const {
-  return params.getPositionName(getTargetHeight());
+  return params.getPosition(getTargetHeight()).first;
 }
 
 String PositionDeskController::getCurrentPosition() const {
-  return params.getPositionName(getCurrentHeight());
+  return params.getPosition(getCurrentHeight()).first;
 }
 
 boolean PositionDeskController::isAtTargetPosition() const {
@@ -82,9 +84,9 @@ boolean PositionDeskController::isAtTargetPosition() const {
 }
 
 void PositionDeskController::setPosition(const String& newPositionName) {
-  const double newHeight = params.getPositionHeight(newPositionName);
-  if (!isnan(newHeight)) {
-    setHeight(newHeight);
+  const PositionDeskControllerParams::position newPosition = params.getPosition(newPositionName);
+  if (!isnan(newPosition.second)) {
+    setHeight(newPosition.second);
   }
 }
 

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <StandardCplusplus.h>
 #include <map>
+#include <utility>
 
 #include "HeightDeskController.h"
 
@@ -11,6 +12,7 @@
 class PositionDeskControllerParams : public HeightDeskControllerParams {
 public:
   typedef std::map<String, double> position_map;
+  typedef std::pair<String, double> position;
   
   PositionDeskControllerParams();
   
@@ -25,8 +27,8 @@ public:
     const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed,
     const position_map& positions);
   
-  double getPositionHeight(const String& name) const;
-  String getPositionName(const double& height) const;
+  position getPosition(const String& name) const;
+  position getPosition(const double& height) const;
   
   void insertPosition(const String& name, const double& height);
   void erasePosition(const String& name);

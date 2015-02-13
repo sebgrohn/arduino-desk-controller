@@ -176,11 +176,11 @@ void loop()  {
     case NONE:
       const double height = (controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
       
-      if (height < controller.params.getPositionHeight(sitPosition)) {
+      if (height < controller.params.getPosition(sitPosition).second) {
         setDeskPosition(sitPosition);
-      } else if (height < controller.params.getPositionHeight(standPosition)) {
+      } else if (height < controller.params.getPosition(standPosition).second) {
         setDeskPosition(standPosition);
-      } else if (height < controller.params.getPositionHeight(maxPosition)) {
+      } else if (height < controller.params.getPosition(maxPosition).second) {
         setDeskPosition(maxPosition);
       }
       break;
@@ -196,11 +196,11 @@ void loop()  {
     case NONE:
       const double height = (controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
       
-      if (height > controller.params.getPositionHeight(standPosition)) {
+      if (height > controller.params.getPosition(standPosition).second) {
         setDeskPosition(standPosition);
-      } else if (height > controller.params.getPositionHeight(sitPosition)) {
+      } else if (height > controller.params.getPosition(sitPosition).second) {
         setDeskPosition(sitPosition);
-      } else if (height > controller.params.getPositionHeight(minPosition)) {
+      } else if (height > controller.params.getPosition(minPosition).second) {
         setDeskPosition(minPosition);
       }
       break;
@@ -356,9 +356,9 @@ void printLength(Print& printer, const double& length) {
   }
 }
 void printHeight(Print& printer, const double& height) {
-  const String positionName = controller.params.getPositionName(height);
-  if (positionName != String()) {
-    printer.print(positionName);
+  const PositionDeskControllerParams::position position = controller.params.getPosition(height);
+  if (position.first != String()) {
+    printer.print(position.first);
   } else {
     printLength(printer, height);
   }
