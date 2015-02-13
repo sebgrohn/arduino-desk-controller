@@ -96,13 +96,13 @@ LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDat
 void setupAlarm(const int& hours, const int& minutes, void (*function)()) {
   const boolean success = (Alarm.alarmRepeat(hours, minutes, 0, function) != dtINVALID_ALARM_ID);
   
-  Serial.print("\t");
+  Serial.print('\t');
   printDigits(Serial, hours);
-  Serial.print(":");
+  Serial.print(':');
   printDigits(Serial, minutes);
-  Serial.print(" ");
-  Serial.print(function != setStandDeskPosition ? (function != setSitDeskPosition ? "?" : "v") : "^");
-  Serial.print(success ? "" : " FAILED");
+  Serial.print(' ');
+  Serial.print(function != setStandDeskPosition ? (function != setSitDeskPosition ? '?' : 'v') : '^');
+  Serial.print(success ? F("") : F(" FAILED"));
 }
 
 
@@ -110,13 +110,13 @@ void setup()  {
   Serial.begin(57600);
   
   printDateTime(Serial);
-  Serial.print(" Initial height:    ");
+  Serial.print(F(" Initial height:    "));
   printHeight(Serial, controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
   Serial.println();
   
   setSyncProvider(requestSync);  //set function to call when sync required
   printDateTime(Serial);
-  Serial.println(" Waiting for time sync...");
+  Serial.println(F(" Waiting for time sync..."));
   
   setupDebouncer(enableDebouncer, enableInputPin);
   setupDebouncer(upDebouncer, upInputPin);
@@ -146,12 +146,12 @@ void loop()  {
   const boolean reachedTargetHeight = controller.update();
   
   const boolean enable = (enableDebouncer.read() == LOW);
-  const boolean up     = (upDebouncer.read() == LOW);
-  const boolean down   = (downDebouncer.read() == LOW);
+  const boolean up     = (upDebouncer.read()     == LOW);
+  const boolean down   = (downDebouncer.read()   == LOW);
   
   if (enableChanged) {
     printDateTime(Serial);
-    Serial.println(enable ? " Enabled" : " Disabled");
+    Serial.println(enable ? F(" Enabled") : F(" Disabled"));
     
     controller.setEnabled(enable);
     
@@ -159,7 +159,7 @@ void loop()  {
       const double targetHeight = controller.getTargetHeight();
       
       printDateTime(Serial);
-      Serial.print(" Saving height:     ");
+      Serial.print(F(" Saving height:     "));
       printHeight(Serial, targetHeight);
       Serial.println();
       
@@ -209,7 +209,7 @@ void loop()  {
   
   if (reachedTargetHeight) {
       printDateTime(Serial);
-      Serial.print(" Reached height:    ");
+      Serial.print(F(" Reached height:    "));
       printHeight(Serial, controller.getTargetHeight());
       Serial.println();
   }
@@ -237,7 +237,7 @@ void processSyncMessage() {
     
     if (firstTime) {
       printDateTime(Serial);
-      Serial.println(" Time synced, setting alarms:");
+      Serial.println(F(" Time synced, setting alarms:"));
       
       // 25 stå, 25-35 sitta
       setupAlarm( 8, 25, setSitDeskPosition);    // 25
@@ -265,7 +265,7 @@ void processSyncMessage() {
       Serial.println();
     } else {
       printDateTime(Serial);
-      Serial.println(" Time synced");
+      Serial.println(F(" Time synced"));
     }
   }
 }
@@ -273,41 +273,41 @@ void processSyncMessage() {
 void printDateTime(Print& printer, const time_t& time) {
   if (time != dtINVALID_TIME) {
     printer.print(year(time));
-    printer.print("-");
+    printer.print('-');
     printDigits(printer, month(time));
-    printer.print("-");
+    printer.print('-');
     printDigits(printer, day(time));
-    printer.print(" ");
+    printer.print(' ');
     printDigits(printer, hour(time));
-    printer.print(":");
+    printer.print(':');
     printDigits(printer, minute(time));
-    printer.print(":");
+    printer.print(':');
     printDigits(printer, second(time));
   } else {
-    printer.print("                   ");
+    printer.print(F("                   "));
   }
 }
 void printDateTime(Print& printer) {
   if (timeStatus() != timeNotSet) {
     printDateTime(printer, now());
   } else {
-    printer.print("xxxx-xx-xx --:--:--");
+    printer.print(F("xxxx-xx-xx --:--:--"));
   }
 }
 void printTimeShort(Print& printer, const time_t& time) {
   if (time != dtINVALID_TIME) {
     printDigits(printer, hour(time));
-    printer.print(":");
+    printer.print(':');
     printDigits(printer, minute(time));
   } else {
-    printer.print("     ");
+    printer.print(F("     "));
   }
 }
 void printTimeShort(Print& printer) {
   if (timeStatus() != timeNotSet) {
     printTimeShort(printer, now());
   } else {
-    printer.print("--:--");
+    printer.print(F("--:--"));
   }
 }
 void printTimeInterval(Print& printer, const time_t& timeInterval) {
@@ -319,25 +319,25 @@ void printTimeInterval(Print& printer, const time_t& timeInterval) {
   
   if (days > 0) {
     printer.print(days + 1);
-    printer.print(" d   ");
+    printer.print(F(" d   "));
   } else if (hours > 10) {
     printer.print(hours + 1);
-    printer.print(" h  ");
+    printer.print(F(" h  "));
   } else if (hours > 0) {
     printer.print(mins == 59 ? hours + 1 : hours);
-    printer.print(":");
+    printer.print(F(":"));
     printDigits(printer, (mins + 1) % 60);
-    printer.print(" h");
+    printer.print(F(" h"));
   } else if (mins > 0) {
     printer.print(mins + 1);
-    printer.print(" m   ");
+    printer.print(F(" m   "));
   } else if (secs > 30) {
-    printer.print("1 m   ");
+    printer.print(F("1 m   "));
   } else if (secs > 10) {
-    printer.print("30 s  ");
+    printer.print(F("30 s  "));
   } else if (secs > 0) {
     printer.print(secs);
-    printer.print(" s   ");
+    printer.print(F(" s   "));
   }
 }
 void printDigits(Print& printer, const int& digits) {
@@ -350,9 +350,9 @@ void printDigits(Print& printer, const int& digits) {
 void printLength(Print& printer, const double& length) {
   if (!isnan(length)) {
     printer.print(length, 2);
-    printer.print(" m");
+    printer.print(F(" m"));
   } else {
-    printer.print("---- m");
+    printer.print(F("---- m"));
   }
 }
 void printHeight(Print& printer, const double& height) {
@@ -376,13 +376,13 @@ void stopDesk() {
   const double currentHeight = controller.getCurrentHeight();
   
   printDateTime(Serial);
-  Serial.print(" Stopped at height: ");
+  Serial.print(F(" Stopped at height: "));
   printHeight(Serial, currentHeight);
   Serial.println();
   
   if (controller.isEnabled() && !controller.isAtTargetPosition()) {
     printDateTime(Serial);
-    Serial.print(" Saving height:     ");
+    Serial.print(F(" Saving height:     "));
     printHeight(Serial, currentHeight);
     Serial.println();
     
@@ -396,13 +396,13 @@ void setDeskPosition(const String& targetPosition) {
   const double targetHeight = controller.getTargetHeight();
   
   printDateTime(Serial);
-  Serial.print(" Driving to height: ");
+  Serial.print(F(" Driving to height: "));
   printHeight(Serial, targetHeight);
   Serial.println();
   
   if (controller.isEnabled() && !controller.isAtTargetPosition()) {
     printDateTime(Serial);
-    Serial.print(" Saving height:     ");
+    Serial.print(F(" Saving height:     "));
     printHeight(Serial, targetHeight);
     Serial.println();
     
@@ -430,7 +430,7 @@ void refreshDisplay(LiquidCrystal& lcd) {
     printTimeInterval(lcd, Alarm.getNextTrigger() - currentTime);
   } else {
     lcd.setCursor(10, 0);
-    lcd.print("      ");
+    lcd.print(F("      "));
   }
   
   const double currentHeight = controller.getCurrentHeight();
@@ -442,7 +442,7 @@ void refreshDisplay(LiquidCrystal& lcd) {
     printHeight(lcd, targetHeight);
     
     lcd.setCursor(7, 1);
-    lcd.print("         ");
+    lcd.print(F("         "));
   } else {
     // current height
     lcd.setCursor(0, 1);
