@@ -30,6 +30,15 @@ public:
   position getPosition(const String& name) const;
   position getPosition(const double& height) const;
   
+  position getHigherPosition(const String& name) const;
+  position getLowerPosition(const String& name) const;
+  
+  position getHigherPosition(const double& height) const;
+  position getLowerPosition(const double& height) const;
+  
+  position getHighestPosition() const;
+  position getLowestPosition() const;
+  
   void insertPosition(const String& name, const double& height);
   void erasePosition(const String& name);
   
@@ -54,6 +63,15 @@ public:
   boolean isAtTargetPosition() const;
   
   void setPosition(const String& newPositionName);
+  
+  void raisePosition();
+  void lowerPosition();
+  
+  void setHighestPosition();
+  void setLowestPosition();
+  
+private:
+  void setHeight(const PositionDeskControllerParams::position& newPosition);
 };
 
 #endif
