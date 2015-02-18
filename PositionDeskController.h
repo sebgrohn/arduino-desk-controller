@@ -57,6 +57,7 @@ public:
   const PositionDeskControllerParams params;
   
   PositionDeskController(const PositionDeskControllerParams& params, const double& initialHeight);
+  PositionDeskController(const PositionDeskControllerParams& params, const double& initialHeight, const double& initialTargetHeight);
   
   String getTargetPosition() const;
   String getCurrentPosition() const;

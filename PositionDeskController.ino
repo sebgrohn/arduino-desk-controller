@@ -146,8 +146,11 @@ void PositionDeskControllerParams::setRevPositions() {
 
 PositionDeskController::PositionDeskController(const PositionDeskControllerParams& params, const double& initialHeight)
     : HeightDeskController(params, initialHeight),
-      params(params) {
-}
+      params(params) {}
+
+PositionDeskController::PositionDeskController(const PositionDeskControllerParams& params, const double& initialHeight, const double& initialTargetHeight)
+    : HeightDeskController(params, initialHeight, initialTargetHeight),
+      params(params) {}
 
 String PositionDeskController::getTargetPosition() const {
   return params.getPosition(getTargetHeight()).first;

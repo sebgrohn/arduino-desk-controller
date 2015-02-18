@@ -51,10 +51,13 @@ double HeightDeskControllerParams::getTimeIntervalForFullHeightDiff(const DeskDr
 
 
 HeightDeskController::HeightDeskController(const HeightDeskControllerParams& params, const double& initialHeight)
+    : HeightDeskController(params, initialHeight, initialHeight) {}
+
+HeightDeskController::HeightDeskController(const HeightDeskControllerParams& params, const double& initialHeight, const double& initialTargetHeight)
     : BaseDeskController(params),
       params(params) {
-  lastStoppedHeight = constrain(initialHeight, params.minHeight, params.maxHeight);
-  targetHeight      = lastStoppedHeight;
+  lastStoppedHeight = constrain(initialHeight,       params.minHeight, params.maxHeight);
+  targetHeight      = constrain(initialTargetHeight, params.minHeight, params.maxHeight);
 }
 
 double HeightDeskController::getTargetHeight() const { return targetHeight; }
