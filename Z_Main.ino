@@ -19,7 +19,6 @@ const char lcdDataPins[] = { 10, 11, 12, 13 };  // data pin 4-7
 
 const char upControlPin   = 7;
 const char downControlPin = 6;
-const char statusLedPin   = 5;
 
 const String TIME_HEADER  = "T";  // header tag for serial time sync message
 const char   TIME_REQUEST = 7;    // ASCII bell character requests a time sync message
@@ -122,8 +121,6 @@ void setup()  {
   setupDebouncer(upDebouncer, upInputPin);
   setupDebouncer(downDebouncer, downInputPin);
   
-  pinMode(statusLedPin, OUTPUT);
-  
   lcd.createChar(DRIVE_DOWN_CHAR, DRIVE_DOWN_CHAR_DEFINITION);
   lcd.createChar(DRIVE_UP_CHAR,   DRIVE_UP_CHAR_DEFINITION);
   lcd.createChar(DRIVE_STOP_CHAR, DRIVE_STOP_CHAR_DEFINITION);
@@ -197,8 +194,6 @@ void loop()  {
       printHeight(Serial, controller.getTargetHeight());
       Serial.println();
   }
-  
-  digitalWrite(statusLedPin, controller.isDriving() || upDebouncer.read() == LOW || downDebouncer.read() == LOW ? HIGH : LOW);
   
   refreshDisplay(lcd);
   
