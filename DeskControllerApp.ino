@@ -1,5 +1,6 @@
 
 #include "PositionDeskController.h"
+#include "EepromField.h"
 
 #include <Time.h>
 #include <TimeAlarms.h>

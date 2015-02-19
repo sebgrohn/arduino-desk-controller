@@ -67,17 +67,15 @@ byte DRIVE_OK_CHAR_DEFINITION[8] = {
   B00000,
 };
 
-const char CURRENT_HEIGHT_EEPROM_ADDRESS        = 0;
-const char CURRENT_TARGET_HEIGHT_EEPROM_ADDRESS = CURRENT_HEIGHT_EEPROM_ADDRESS + sizeof(double);
+const char CURRENT_HEIGHT_EEPROM_ADDRESS = 0;
+const char TARGET_HEIGHT_EEPROM_ADDRESS  = CURRENT_HEIGHT_EEPROM_ADDRESS + sizeof(double);
 
 Bounce enableDebouncer = Bounce();
 Bounce upDebouncer     = Bounce();
 Bounce downDebouncer   = Bounce();
 
-double initialHeight;
-double initialTargetHeight;
-const int ignored1 = EEPROM_readAnything(CURRENT_HEIGHT_EEPROM_ADDRESS,        initialHeight);
-const int ignored2 = EEPROM_readAnything(CURRENT_TARGET_HEIGHT_EEPROM_ADDRESS, initialTargetHeight);
+EEPROMField<double> eepromCurrentHeight = EEPROMField<double>(EEPROMFieldParams<double>(CURRENT_HEIGHT_EEPROM_ADDRESS), minHeight);
+EEPROMField<double> eepromTargetHeight  = EEPROMField<double>(EEPROMFieldParams<double>(TARGET_HEIGHT_EEPROM_ADDRESS),  eepromCurrentHeight);
 
 std::map<String, double> createControllerPositions() {
   std::map<String, double> controllerPositions = std::map<String, double>();
@@ -91,7 +89,7 @@ PositionDeskControllerParams controllerParams(
     upControlPin, downControlPin,
     minHeight, maxHeight, 0.0295, 0.0335,
     createControllerPositions());
-PositionDeskController controller(controllerParams, !isnan(initialHeight) ? initialHeight : minHeight, !isnan(initialTargetHeight) ? initialTargetHeight : (!isnan(initialHeight) ? initialHeight : minHeight));
+PositionDeskController controller(controllerParams, eepromCurrentHeight, eepromTargetHeight);
 
 LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
 
@@ -192,7 +190,7 @@ void loop()  {
     printHeight(Serial, targetHeight);
     Serial.println();
     
-    EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, targetHeight);
+    eepromCurrentHeight = targetHeight;
   }
   
   refreshDisplay(lcd);
@@ -359,9 +357,7 @@ void stopDesk() {
   printHeight(Serial, currentHeight);
   Serial.println();
   
-  if (controller.isEnabled() && !controller.isAtTargetPosition()) {
-    EEPROM_writeAnything(CURRENT_HEIGHT_EEPROM_ADDRESS, currentHeight);
-  }
+  eepromCurrentHeight = currentHeight;
 }
 
 void setDeskPosition(const String& targetPosition) {
@@ -374,9 +370,7 @@ void setDeskPosition(const String& targetPosition) {
   printHeight(Serial, targetHeight);
   Serial.println();
   
-  if (!controller.isAtTargetPosition()) {
-    EEPROM_writeAnything(CURRENT_TARGET_HEIGHT_EEPROM_ADDRESS, targetHeight);
-  }
+  eepromTargetHeight = targetHeight;
 }
 void raiseDeskPosition() {
   controller.raisePosition();
@@ -388,9 +382,7 @@ void raiseDeskPosition() {
   printHeight(Serial, targetHeight);
   Serial.println();
   
-  if (!controller.isAtTargetPosition()) {
-    EEPROM_writeAnything(CURRENT_TARGET_HEIGHT_EEPROM_ADDRESS, targetHeight);
-  }
+  eepromTargetHeight = targetHeight;
 }
 void lowerDeskPosition() {
   controller.lowerPosition();
@@ -402,9 +394,7 @@ void lowerDeskPosition() {
   printHeight(Serial, targetHeight);
   Serial.println();
   
-  if (!controller.isAtTargetPosition()) {
-    EEPROM_writeAnything(CURRENT_TARGET_HEIGHT_EEPROM_ADDRESS, targetHeight);
-  }
+  eepromTargetHeight = targetHeight;
 }
 void setSitDeskPosition()   { setDeskPosition(sitPosition); }
 void setStandDeskPosition() { setDeskPosition(standPosition); }
