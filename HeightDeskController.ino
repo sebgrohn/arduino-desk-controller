@@ -81,22 +81,31 @@ boolean HeightDeskController::isAtTargetHeight() const {
   }
 }
 
-void HeightDeskController::setHeight(const double& newHeight) {
-  targetHeight = constrain(newHeight, params.minHeight, params.maxHeight);
-  resumeDrive();
+DeskDrivingDirection HeightDeskController::getTargetDrivingDirection() const {
+  if (isAtTargetHeight()) {
+    return NONE;
+  } else {
+    const double currentHeight = getCurrentHeight();
+    if (targetHeight > currentHeight) {
+      return UP;
+    } else if (targetHeight < currentHeight) {
+      return DOWN;
+    }
+    return NONE;  // will never be reached
+  }
 }
 
-void HeightDeskController::resumeDrive() {
-  if (isAtTargetHeight()) {
-    stopDrive();
-  } else {
-    const double& currentHeight = getCurrentHeight();
-    if (targetHeight > currentHeight) {
-      startDriveUp();
-    } else if (targetHeight < currentHeight) {
-      startDriveDown();
-    }
-  }
+boolean HeightDeskController::wantToDrive() const     { return getTargetDrivingDirection() != NONE; }
+boolean HeightDeskController::wantToDriveUp() const   { return getTargetDrivingDirection() == UP; }
+boolean HeightDeskController::wantToDriveDown() const { return getTargetDrivingDirection() == DOWN; }
+
+void HeightDeskController::setHeight(const double& newHeight) {
+  targetHeight = constrain(newHeight, params.minHeight, params.maxHeight);
+  resumeDriving();
+}
+
+void HeightDeskController::resumeDriving() {
+  setDrivingDirection(getTargetDrivingDirection());
 }
 
 boolean HeightDeskController::update() {
@@ -105,14 +114,6 @@ boolean HeightDeskController::update() {
     return true;
   } else {
     return false;
-  }
-}
-
-void HeightDeskController::setEnabled(const boolean& newEnabled) {
-  BaseDeskController::setEnabled(newEnabled);
-  
-  if (/*!isEnabled() &&*/ newEnabled) {
-    resumeDrive();
   }
 }
 

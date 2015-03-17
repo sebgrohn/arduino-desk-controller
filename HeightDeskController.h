@@ -47,13 +47,17 @@ public:
   double getCurrentHeight() const;
   boolean isAtTargetHeight() const;
   
+  DeskDrivingDirection getTargetDrivingDirection() const;
+  
+  boolean wantToDrive() const;
+  boolean wantToDriveUp() const;
+  boolean wantToDriveDown() const;
+  
   void setHeight(const double& newHeight);
   
-  void resumeDrive();
+  void resumeDriving();
   
   virtual boolean update();
-  
-  virtual void setEnabled(const boolean& newEnabled);
   
   virtual void setDrivingDirection(const DeskDrivingDirection& direction);
   

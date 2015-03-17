@@ -166,28 +166,28 @@ boolean PositionDeskController::isAtTargetPosition() const {
 
 void PositionDeskController::setPosition(const String& newPositionName) {
   const PositionDeskControllerParams::position newPosition = params.getPosition(newPositionName);
-  setHeight(newPosition);
+  setHeightImpl(newPosition);
 }
 
 void PositionDeskController::raisePosition() {
   const PositionDeskControllerParams::position newPosition = params.getHigherPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
-  setHeight(newPosition);
+  setHeightImpl(newPosition);
 }
 
 void PositionDeskController::lowerPosition() {
   const PositionDeskControllerParams::position newPosition = params.getLowerPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
-  setHeight(newPosition);
+  setHeightImpl(newPosition);
 }
 
 void PositionDeskController::setHighestPosition() {
-  setHeight(params.getHighestPosition());
+  setHeightImpl(params.getHighestPosition());
 }
 
 void PositionDeskController::setLowestPosition() {
-  setHeight(params.getLowestPosition());
+  setHeightImpl(params.getLowestPosition());
 }
 
-void PositionDeskController::setHeight(const PositionDeskControllerParams::position& newPosition) {
+void PositionDeskController::setHeightImpl(const PositionDeskControllerParams::position& newPosition) {
   if (!isnan(newPosition.second)) {
     HeightDeskController::setHeight(newPosition.second);
   }

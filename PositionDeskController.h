@@ -72,7 +72,7 @@ public:
   void setLowestPosition();
   
 private:
-  void setHeight(const PositionDeskControllerParams::position& newPosition);
+  void setHeightImpl(const PositionDeskControllerParams::position& newPosition);
 };
 
 #endif

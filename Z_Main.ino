@@ -109,19 +109,6 @@ void setupAlarm(const int& hours, const int& minutes, void (*function)()) {
 void setup()  {
   Serial.begin(57600);
   
-  printDateTime(Serial);
-  Serial.print(F(" Initial height:        "));
-  printHeight(Serial, controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
-  Serial.println();
-  printDateTime(Serial);
-  Serial.print(F(" Initial target height: "));
-  printHeight(Serial, controller.getTargetHeight());
-  Serial.println();
-  
-  setSyncProvider(requestSync);  //set function to call when sync required
-  printDateTime(Serial);
-  Serial.println(F(" Waiting for time sync..."));
-  
   setupDebouncer(enableDebouncer, enableInputPin);
   setupDebouncer(upDebouncer, upInputPin);
   setupDebouncer(downDebouncer, downInputPin);
@@ -133,7 +120,24 @@ void setup()  {
   lcd.begin(lcdNumCols, lcdNumRows);
   lcd.clear();
   
-  controller.setEnabled(enableDebouncer.read() == LOW);
+  const boolean enable = (enableDebouncer.read() == LOW);
+  
+  controller.setEnabled(enable);
+  
+  printDateTime(Serial);
+  Serial.print(F(" Initial height:        "));
+  printHeight(Serial, controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
+  Serial.println();
+  printDateTime(Serial);
+  Serial.print(F(" Initial target height: "));
+  printHeight(Serial, controller.getTargetHeight());
+  Serial.println();
+  printDateTime(Serial);
+  Serial.println(enable ? F(" Enabled") : F(" Disabled"));
+
+  setSyncProvider(requestSync);  //set function to call when sync required
+  printDateTime(Serial);
+  Serial.println(F(" Waiting for time sync..."));
 }
 
 void loop()  {
@@ -156,29 +160,29 @@ void loop()  {
     
     printDateTime(Serial);
     Serial.println(enable ? F(" Enabled") : F(" Disabled"));
+    
+    if (enable && !controller.isAtTargetPosition() && Alarm.getNextTrigger() - now() > 10) {
+      Alarm.timerOnce(10, resumeDeskDriving);
+    }
   }
   
   if (upChanged && up) {
-    switch (controller.getDrivingDirection()) {
-    case DOWN:
+    if (controller.isDrivingDown()) {
       stopDesk();
-      break;
-      
-    default:
+    } else if (controller.wantToDriveDown()) {
+      abortDeskDrive();
+    } else {
       raiseDeskPosition();
-      break;
     }
   }
   
   if (downChanged && down) {
-    switch (controller.getDrivingDirection()) {
-    case UP:
+    if (controller.isDrivingUp()) {
       stopDesk();
-      break;
-      
-    default:
+    } else if (controller.wantToDriveUp()) {
+      abortDeskDrive();
+    } else {
       lowerDeskPosition();
-      break;
     }
   }
   
@@ -186,7 +190,7 @@ void loop()  {
     const double targetHeight = controller.getTargetHeight();
     
     printDateTime(Serial);
-    Serial.print(F(" Reached height:        "));
+    Serial.print(F(" Reached height:     "));
     printHeight(Serial, targetHeight);
     Serial.println();
     
@@ -353,20 +357,38 @@ void stopDesk() {
   const double currentHeight = controller.getCurrentHeight();
   
   printDateTime(Serial);
-  Serial.print(F(" Stopped at height:     "));
+  Serial.print(F(" Stopped at height:  "));
   printHeight(Serial, currentHeight);
   Serial.println();
   
   eepromCurrentHeight = currentHeight;
 }
-
+void abortDeskDrive() {
+  const double currentHeight = controller.getCurrentHeight();
+  controller.setHeight(currentHeight);
+  
+  printDateTime(Serial);
+  Serial.print(F(" Drove to height:    "));
+  printHeight(Serial, currentHeight);
+  Serial.println();
+  
+  eepromCurrentHeight = currentHeight;
+}
+void resumeDeskDriving() {
+  controller.resumeDriving();
+  
+  printDateTime(Serial);
+  Serial.print(F(" Driving to height:  "));
+  printHeight(Serial, controller.getTargetHeight());
+  Serial.println();
+}
 void setDeskPosition(const String& targetPosition) {
   controller.setPosition(targetPosition);
   
   const double targetHeight = controller.getTargetHeight();
   
   printDateTime(Serial);
-  Serial.print(F(" Driving to height:     "));
+  Serial.print(F(" Driving to height:  "));
   printHeight(Serial, targetHeight);
   Serial.println();
   
@@ -378,7 +400,7 @@ void raiseDeskPosition() {
   const double targetHeight = controller.getTargetHeight();
   
   printDateTime(Serial);
-  Serial.print(F(" Raising to height:     "));
+  Serial.print(F(" Raising to height:  "));
   printHeight(Serial, targetHeight);
   Serial.println();
   
@@ -390,7 +412,7 @@ void lowerDeskPosition() {
   const double targetHeight = controller.getTargetHeight();
   
   printDateTime(Serial);
-  Serial.print(F(" Lowering to height:    "));
+  Serial.print(F(" Lowering to height: "));
   printHeight(Serial, targetHeight);
   Serial.println();
   
