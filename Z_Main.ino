@@ -300,8 +300,8 @@ void printTimeInterval(Print& printer, const time_t& timeInterval) {
   
   if (days > 0) {
     printer.print(days + 1);
-    printer.print(F(" d   "));
-  } else if (hours > 10) {
+    printer.print(F(" days"));
+  } else if (hours > 8) {
     printer.print(hours + 1);
     printer.print(F(" h  "));
   } else if (hours > 0) {
@@ -311,13 +311,9 @@ void printTimeInterval(Print& printer, const time_t& timeInterval) {
     printer.print(F(" h"));
   } else if (mins > 0) {
     printer.print(mins + 1);
-    printer.print(F(" m   "));
-  } else if (secs > 30) {
-    printer.print(F("1 m   "));
-  } else if (secs > 10) {
-    printer.print(F("30 s  "));
+    printer.print(F(" min "));
   } else if (secs > 0) {
-    printer.print(secs);
+    printer.print(secs + 1);
     printer.print(F(" s   "));
   }
 }
@@ -450,21 +446,20 @@ void refreshDisplay(LiquidCrystal& lcd) {
     lcd.setCursor(0, 1);
     printHeight(lcd, targetHeight);
     
-    lcd.setCursor(7, 1);
-    lcd.print(F("         "));
+    lcd.setCursor(8, 1);
+    lcd.print(F("        "));
   } else {
     // current height
     lcd.setCursor(0, 1);
     printHeight(lcd, currentHeight);
     
     // driving direction
-    lcd.setCursor(7, 1);
+    lcd.setCursor(8, 1);
     if (targetHeight > currentHeight) {
       lcd.write(DRIVE_UP_CHAR);
     } else {
       lcd.write(DRIVE_DOWN_CHAR);
     }
-    lcd.write(controller.isDriving() ? ' ' : DRIVE_STOP_CHAR);
     
     // target height
     lcd.setCursor(10, 1);
