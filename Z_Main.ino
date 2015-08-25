@@ -143,15 +143,15 @@ void loop()  {
   const boolean down         = (downDebouncer.read()   == LOW);
   
   if (enableChanged && toggleEnable) {
-    const boolean enable = !controller.isEnabled();
+    controller.toggleEnabled();
     
-    controller.setEnabled(enable);
-    eepromEnabled = enable;
+    const boolean enabled = controller.isEnabled();
+    eepromEnabled = enabled;
     
     printDateTime(Serial);
-    Serial.println(enable ? F(" Enabled") : F(" Disabled"));
+    Serial.println(enabled ? F(" Enabled") : F(" Disabled"));
     
-    if (enable && !controller.isAtTargetPosition() && Alarm.getNextTrigger() - now() > 10) {
+    if (enabled && !controller.isAtTargetPosition() && Alarm.getNextTrigger() - now() > 10) {
       Alarm.timerOnce(10, resumeDeskDriving);
     }
   }

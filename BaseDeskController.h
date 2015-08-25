@@ -38,6 +38,7 @@ public:
   boolean isDrivingDown() const;
   
   virtual void setEnabled(const boolean& newEnabled);
+  void toggleEnabled();
   
   virtual void setDrivingDirection(const DeskDrivingDirection& direction);
   

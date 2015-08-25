@@ -35,6 +35,14 @@ void BaseDeskController::setEnabled(const boolean& newEnabled) {
   enabled = newEnabled;
 }
 
+void BaseDeskController::toggleEnabled() {
+  if (enabled) {
+    setEnabled(false);
+  } else {
+    setEnabled(true);
+  }
+}
+
 void BaseDeskController::setDrivingDirection(const DeskDrivingDirection& newDrivingDirection) {
   if (newDrivingDirection != NONE && !enabled) {
     return;
