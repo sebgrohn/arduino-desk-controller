@@ -74,6 +74,8 @@ PositionDeskController controller(controllerParams, eepromCurrentHeight, eepromT
 
 LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
 
+boolean serialInitialized = false;
+
 void setupAlarm(const int& hours, const int& minutes, void (*function)()) {
   const boolean success = (Alarm.alarmRepeat(hours, minutes, 0, function) != dtINVALID_ALARM_ID);
   
@@ -101,28 +103,33 @@ void setup()  {
   lcd.begin(lcdNumCols, lcdNumRows);
   lcd.clear();
   
-  const boolean enable = eepromEnabled;
-  controller.setEnabled(enable);
-  
-  printDateTime(Serial);
-  Serial.print(F(" Initial height:        "));
-  printHeight(Serial, controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight(), controller.params);
-  Serial.println();
-  printDateTime(Serial);
-  Serial.print(F(" Initial target height: "));
-  printHeight(Serial, controller.getTargetHeight(), controller.params);
-  Serial.println();
-  printDateTime(Serial);
-  Serial.println(enable ? F(" Enabled") : F(" Disabled"));
-
-  setSyncProvider(requestSync);  //set function to call when sync required
-  printDateTime(Serial);
-  Serial.println(F(" Waiting for time sync..."));
+  controller.setEnabled(eepromEnabled);
 }
 
 void loop()  {
-  if (Serial.available()) {
-    processSyncMessage();
+  if (!serialInitialized) {
+    if (Serial) {
+      serialInitialized = true;
+      
+      printDateTime(Serial);
+      Serial.print(F(" Initial height:        "));
+      printHeight(Serial, controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight(), controller.params);
+      Serial.println();
+      printDateTime(Serial);
+      Serial.print(F(" Initial target height: "));
+      printHeight(Serial, controller.getTargetHeight(), controller.params);
+      Serial.println();
+      printDateTime(Serial);
+      Serial.println(controller.isEnabled() ? F(" Enabled") : F(" Disabled"));
+    
+      setSyncProvider(requestSync);  //set function to call when sync required
+      printDateTime(Serial);
+      Serial.println(F(" Waiting for time sync..."));
+    }
+  } else {
+    if (Serial.available()) {
+      processSyncMessage();
+    }
   }
   
   const boolean enableChanged = enableDebouncer.update();
