@@ -41,6 +41,8 @@ public:
   void insertPosition(const String& name, const double& height);
   void erasePosition(const String& name);
   
+  void debugPrint(Print& printer) const;
+  
 private:
   typedef std::map<double, String> rev_position_map;
   
@@ -48,6 +50,9 @@ private:
   rev_position_map revPositions;
   
   void setRevPositions();
+  
+  void printPosition(Print& printer, const position& position) const;
+  void printRevPosition(Print& printer, const std::pair<double, String>& revPosition) const;
 };
 
 

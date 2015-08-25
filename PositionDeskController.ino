@@ -73,6 +73,24 @@ PositionDeskControllerParams::position PositionDeskControllerParams::getLowerPos
   return std::make_pair(it->second, it->first);
 }
 
+// std::map<>::lower_bound(...) vs upper_bound(...) (L vs U)
+// 
+//    begin
+//    "min"     "sit"    "stand"    "max"      end
+//      |---------|---------|---------|         |
+//                                         ^   LU
+//                          l        L^         U
+//                          l    ^   LU
+//                l        L^         U
+//                l    ^   LU
+//      l        L^         U
+//      l    ^   LU
+//     L^         U
+// ^   LU
+//      |---------|---------|---------|         |
+//    "min"     "sit"    "stand"    "max"      end
+//    begin
+
 PositionDeskControllerParams::position PositionDeskControllerParams::getHigherPosition(const double& height) const {
   rev_position_map::const_iterator itLower = revPositions.lower_bound(height);
   rev_position_map::const_iterator itUpper = revPositions.upper_bound(height);
@@ -141,6 +159,103 @@ void PositionDeskControllerParams::setRevPositions() {
   for (position_map::const_iterator it = positions.begin(); it != positions.end(); it++) {
     revPositions[it->second] = it->first;
   }
+}
+
+void PositionDeskControllerParams::debugPrint(Print& printer) const {
+  printer.println(F("\tpositions:"));
+  for(position_map::const_iterator it = positions.begin(); it != positions.end(); it++) {
+    printPosition(printer, *it);
+  }
+  printer.println();
+  
+  printer.println(F("\trevPositions:"));
+  for(rev_position_map::const_iterator it = revPositions.begin(); it != revPositions.end(); it++) {
+    printRevPosition(printer, *it);
+  }
+  printer.println();
+  
+  position pos;
+  
+  printer.println(F("\ttraverse up (name):"));
+  pos = getLowestPosition();
+  printPosition(printer, pos);
+  pos = getHigherPosition(pos.first);
+  printPosition(printer, pos);
+  pos = getHigherPosition(pos.first);
+  printPosition(printer, pos);
+  pos = getHigherPosition(pos.first);
+  printPosition(printer, pos);
+  pos = getHigherPosition(pos.first);
+  printPosition(printer, pos);
+  printer.println();
+  
+  printer.println(F("\ttraverse down (name):"));
+  pos = getHighestPosition();
+  printPosition(printer, pos);
+  pos = getLowerPosition(pos.first);
+  printPosition(printer, pos);
+  pos = getLowerPosition(pos.first);
+  printPosition(printer, pos);
+  pos = getLowerPosition(pos.first);
+  printPosition(printer, pos);
+  pos = getLowerPosition(pos.first);
+  printPosition(printer, pos);
+  printer.println();
+  
+  printer.println(F("\ttraverse up (height):"));
+  pos = getLowestPosition();
+  printPosition(printer, pos);
+  pos = getHigherPosition(pos.second);
+  printPosition(printer, pos);
+  pos = getHigherPosition(pos.second);
+  printPosition(printer, pos);
+  pos = getHigherPosition(pos.second);
+  printPosition(printer, pos);
+  pos = getHigherPosition(pos.second);
+  printPosition(printer, pos);
+  printer.println();
+  
+  printer.println(F("\ttraverse down (height):"));
+  pos = getHighestPosition();
+  printPosition(printer, pos);
+  pos = getLowerPosition(pos.second);
+  printPosition(printer, pos);
+  pos = getLowerPosition(pos.second);
+  printPosition(printer, pos);
+  pos = getLowerPosition(pos.second);
+  printPosition(printer, pos);
+  pos = getLowerPosition(pos.second);
+  printPosition(printer, pos);
+}
+void PositionDeskControllerParams::printPosition(Print& printer, const position& position) const {
+  printer.print(F("\t\""));
+  printer.print(position.first);
+  printer.print(F("\"\t=> "));
+  printer.print(position.second);
+  printer.print(F("\t<=> "));
+  printer.print(revPositions.find(position.second)->first);
+  printer.print(F("\t=> \""));
+  printer.print(revPositions.find(position.second)->second);
+  printer.print(F("\"\t| "));
+  printer.print(position.first == revPositions.find(position.second)->second);
+  printer.print(' ');
+  printer.print(position.second == revPositions.find(position.second)->first);
+  printer.println();
+}
+void PositionDeskControllerParams::printRevPosition(Print& printer, const std::pair<double, String>& revPosition) const {
+  printer.print(F("\t"));
+  printer.print(revPosition.first);
+  printer.print(F("\t=> \""));
+  printer.print(revPosition.second);
+  printer.print(F("\"\t<=> \""));
+  printer.print(positions.find(revPosition.second)->first);
+  printer.print(F("\"\t=> "));
+  printer.print(positions.find(revPosition.second)->second);
+  printer.print(F("\t| "));
+  printer.print(revPosition.first == positions.find(revPosition.second)->second);
+  printer.print(' ');
+  printer.print(revPosition.second == positions.find(revPosition.second)->first);
+  printer.println();
 }
 
 
