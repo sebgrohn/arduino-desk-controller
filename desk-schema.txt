@@ -1,3 +1,5 @@
+Schema 1:
+
        ┌───────── C1 ───────────┐
        │                        │
 lila ──┴── R1 ─── D1 (LED) ──┬──┴──── gray
@@ -12,7 +14,7 @@ grön ─── SW4 ──┐  │
 röd ──── SW3 ──┘
         (ner)
 
-		  
+
    grå    1   orange-vit
    -      2   orange
    -      3   grön-vit
@@ -21,6 +23,23 @@ röd ──── SW3 ──┘
    -      6   grön
    lila   7   brun-vit
    röd    8   brun
+
+
+Schema 2:
+
+gul 6 ──── SW6 ──┐
+                 │
+lila 7 ─── SW5 ──┤
+                 │
+grön 9 ─── SW4 ──┤
+          (upp)  │
+                 ├── 8 röd
+oran 5 ─── SW3 ──┤
+          (ner)  │
+                 │
+grå 1 ──── SW2 ──┤
+                 │
+blå 2 ──── SW1 ──┘
 
 
 ┌───┬───┐   ╓───╥───╖   ╒═══╤═══╕   ╔═══╦═══╗
