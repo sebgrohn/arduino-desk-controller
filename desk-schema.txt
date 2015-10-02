@@ -1,45 +1,45 @@
 Schema 1:
 
-       ┌───────── C1 ───────────┐
-       │                        │
-lila ──┴── R1 ─── D1 (LED) ──┬──┴──── gray
-                     →       │
-                             │
-                      Z1 (zener-diod) ↓
-                             │
-                  ┌──────────┘
-grön ─── SW4 ──┐  │
-        (upp)  │  │
-               ├──┴── J9 (nyckel) ─── blå
-röd ──── SW3 ──┘
-        (ner)
+         ┌───────── C1 ───────────┐
+         │                        │
+purple ──┴── R1 ─── D1 (LED) ──┬──┴──── gray
+                       →       │
+                               │
+                        Z1 (zener diode) ↓
+                               │
+                   ┌───────────┘
+green ─── SW4 ──┐  │
+          (up)  │  │
+                ├──┴── J9 (key) ─── blue
+red ───── SW3 ──┘
+         (down)
 
 
-   grå    1   orange-vit
+   gray   1   orange-white
    -      2   orange
-   -      3   grön-vit
-   blå    4   blå
-   grön   5   blå-vit
-   -      6   grön
-   lila   7   brun-vit
-   röd    8   brun
+   -      3   green-vit
+   blue   4   blue
+   green  5   blue-white
+   -      6   green
+   purple 7   brown-white
+   red    8   brown
 
 
 Schema 2:
 
-gul 6 ──── SW6 ──┐
-                 │
-lila 7 ─── SW5 ──┤
-                 │
-grön 9 ─── SW4 ──┤
-          (upp)  │
-                 ├── 8 röd
-oran 5 ─── SW3 ──┤
-          (ner)  │
-                 │
-grå 1 ──── SW2 ──┤
-                 │
-blå 2 ──── SW1 ──┘
+yellow 6 ─── SW6 ──┐
+                   │
+purple 7 ─── SW5 ──┤
+                   │
+green 9 ──── SW4 ──┤
+             (up)  │
+                   ├── 8 red
+orange 5 ─── SW3 ──┤
+            (down) │
+                   │
+gray 1 ───── SW2 ──┤
+                   │
+blue 2 ───── SW1 ──┘
 
 
 ┌───┬───┐   ╓───╥───╖   ╒═══╤═══╕   ╔═══╦═══╗
