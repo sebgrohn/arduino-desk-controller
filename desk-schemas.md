@@ -1,5 +1,8 @@
-Schema 1:
+# Schemas for Desk Controllers
 
+## Schema 1
+
+```
          ┌───────── C1 ───────────┐
          │                        │
 purple ──┴── R1 ─── D1 (LED) ──┬──┴──── gray
@@ -13,37 +16,57 @@ green ─── SW4 ──┐  │
                 ├──┴── J9 (key) ─── blue
 red ───── SW3 ──┘
          (down)
+```
+
+| Color  | Pin | Cor. TP color |
+|--------|-----|---------------|
+| gray   | 1   | orange/white  |
+| -      | 2   | orange        |
+| -      | 3   | green/white   |
+| blue   | 4   | blue          |
+| green  | 5   | blue/white    |
+| -      | 6   | green         |
+| purple | 7   | brown/white   |
+| red    | 8   | brown         |
 
 
-   gray   1   orange-white
-   -      2   orange
-   -      3   green-vit
-   blue   4   blue
-   green  5   blue-white
-   -      6   green
-   purple 7   brown-white
-   red    8   brown
+## Schema 2
+
+```
+yellow ─── SW6 ──┐
+                 │
+purple ─── SW5 ──┤
+                 │
+green ──── SW4 ──┤
+           (up)  │
+                 ├── red
+orange ─── SW3 ──┤
+          (down) │
+                 │
+gray ───── SW2 ──┤
+                 │
+blue ───── SW1 ──┘
+```
+
+| Color  | Pin |
+|--------|-----|
+| gray   | 1   |
+| blue   | 2   |
+| -      | 3   |
+| -      | 4   |
+| orange | 5   |
+| yellow | 6   |
+| purple | 7   |
+| red    | 8   |
+| green  | 9   |
 
 
-Schema 2:
+## Box Templates
 
-yellow 6 ─── SW6 ──┐
-                   │
-purple 7 ─── SW5 ──┤
-                   │
-green 9 ──── SW4 ──┤
-             (up)  │
-                   ├── 8 red
-orange 5 ─── SW3 ──┤
-            (down) │
-                   │
-gray 1 ───── SW2 ──┤
-                   │
-blue 2 ───── SW1 ──┘
-
-
+```
 ┌───┬───┐   ╓───╥───╖   ╒═══╤═══╕   ╔═══╦═══╗
 │   │   │   ║   ║   ║   │   │   │   ║   ║   ║
 ├───┼───┤   ╟───╫───╢   ╞═══╪═══╡   ╠═══╬═══╣
 │   │   │   ║   ║   ║   │   │   │   ║   ║   ║
 └───┴───┘   ╙───╨───╜   ╘═══╧═══╛   ╚═══╩═══╝
+```
