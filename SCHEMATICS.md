@@ -1,6 +1,6 @@
-# Schemas for Desk Controllers
+# Schematics for Desk Controllers
 
-## Schema 1
+## Schematic A
 
 ```
          ┌───────── C1 ───────────┐
@@ -30,7 +30,7 @@ red ───── SW3 ──┘
 | red    | 8   | brown         |
 
 
-## Schema 2
+## Schematic B
 
 ```
 yellow ─── SW6 ──┐
