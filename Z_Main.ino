@@ -48,13 +48,15 @@ byte DRIVE_OK_CHAR_DEFINITION[8] = {
 
 const char CURRENT_HEIGHT_EEPROM_ADDRESS = 0;
 const char TARGET_HEIGHT_EEPROM_ADDRESS  = CURRENT_HEIGHT_EEPROM_ADDRESS + sizeof(double);
+const char ENABLED_EEPROM_ADDRESS        = TARGET_HEIGHT_EEPROM_ADDRESS + sizeof(double);
 
 Bounce enableDebouncer = Bounce();
 Bounce upDebouncer     = Bounce();
 Bounce downDebouncer   = Bounce();
 
-EEPROMField<double> eepromCurrentHeight = EEPROMField<double>(EEPROMFieldParams<double>(CURRENT_HEIGHT_EEPROM_ADDRESS), minHeight);
-EEPROMField<double> eepromTargetHeight  = EEPROMField<double>(EEPROMFieldParams<double>(TARGET_HEIGHT_EEPROM_ADDRESS),  eepromCurrentHeight);
+EEPROMField<double> eepromCurrentHeight = EEPROMField<double>(EEPROMFieldParams<double>(CURRENT_HEIGHT_EEPROM_ADDRESS), sitHeight);
+EEPROMField<double> eepromTargetHeight  = EEPROMField<double>(EEPROMFieldParams<double>(TARGET_HEIGHT_EEPROM_ADDRESS), eepromCurrentHeight);
+EEPROMField<boolean> eepromEnabled      = EEPROMField<boolean>(EEPROMFieldParams<boolean>(ENABLED_EEPROM_ADDRESS), true);
 
 PositionMap createControllerPositions() {
   PositionMap controllerPositions = PositionMap();
@@ -99,8 +101,7 @@ void setup()  {
   lcd.begin(lcdNumCols, lcdNumRows);
   lcd.clear();
   
-  const boolean enable = (enableDebouncer.read() == LOW);
-  
+  const boolean enable = eepromEnabled;
   controller.setEnabled(enable);
   
   printDateTime(Serial);
@@ -130,12 +131,15 @@ void loop()  {
   
   const boolean reachedTargetHeight = controller.update();
   
-  const boolean enable = (enableDebouncer.read() == LOW);
-  const boolean up     = (upDebouncer.read()     == LOW);
-  const boolean down   = (downDebouncer.read()   == LOW);
+  const boolean toggleEnable = (enableDebouncer.read() == HIGH);
+  const boolean up           = (upDebouncer.read()     == LOW);
+  const boolean down         = (downDebouncer.read()   == LOW);
   
-  if (enableChanged) {
+  if (enableChanged && toggleEnable) {
+    const boolean enable = !controller.isEnabled();
+    
     controller.setEnabled(enable);
+    eepromEnabled = enable;
     
     printDateTime(Serial);
     Serial.println(enable ? F(" Enabled") : F(" Disabled"));
