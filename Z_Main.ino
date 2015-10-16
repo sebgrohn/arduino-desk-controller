@@ -4,6 +4,9 @@ const double maxHeight   = 1.175;  // in meters
 const double sitHeight   = 0.700;  // in meters
 const double standHeight = 1.110;  // in meters
 
+const double upSpeed   = 0.0295;  // in m/s
+const double downSpeed = 0.0335;  // in m/s
+
 const String minPosition   = "Min   ";
 const String maxPosition   = "Max   ";
 const String sitPosition   = "Sit   ";
@@ -87,7 +90,7 @@ std::map<String, double> createControllerPositions() {
 }
 PositionDeskControllerParams controllerParams(
     upControlPin, downControlPin,
-    minHeight, maxHeight, 0.0295, 0.0335,
+    minHeight, maxHeight, upSpeed, downSpeed,
     createControllerPositions());
 PositionDeskController controller(controllerParams, eepromCurrentHeight, eepromTargetHeight);
 
