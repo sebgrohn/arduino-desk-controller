@@ -1,34 +1,31 @@
-language: c
+language: python
+python:
+  - "2.7"
 
+# Cache PlatformIO packages using Travis CI container-based infrastructure
 sudo: false
+cache:
+  directories:
+    - "~/.platformio"
 
 env:
-  - ARDUINO_VERSION=1.6.6 BOARD=arduino:avr:leonardo
-
-before_install:
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
-  - sleep 3
-  - export DISPLAY=:1.0
-
-  - wget http://downloads.arduino.cc/arduino-$ARDUINO_VERSION-linux64.tar.xz
-  - tar xf arduino-$ARDUINO_VERSION-linux64.tar.xz
-  - mv arduino-$ARDUINO_VERSION /tmp/arduino
+  - PLATFORMIO_CI_SRC=. BOARD=leonardo
 
 install:
-  # /tmp/arduino/arduino --install-library "Bounce2:2.1.0,Time:1.5.0,TimeAlarms:1.4.0"
-  - /tmp/arduino/arduino --install-library "Bounce2:2.1.0,TimeAlarms:1.4.0"
+  - pip install -U platformio
+  - platformio lib install 44  # Time
+  - platformio lib install 68  # TimeAlarms
 
-  # NOTE Time is not found by Travis CI although it should be available
-  - wget https://github.com/PaulStoffregen/Time/archive/v1.5.zip -O /tmp/Time.zip
-  - unzip /tmp/Time.zip -d /tmp/
-  - mv /tmp/Time-* $HOME/Arduino/libraries/Time
+  - wget https://github.com/thomasfredericks/Bounce2/archive/V2.1.zip -O /tmp/Bounce2.zip
+  - unzip /tmp/Bounce2.zip -d /tmp/
+  - mv /tmp/Bounce2-* /tmp/Bounce2
 
   - wget https://github.com/maniacbug/StandardCplusplus/archive/af18241.zip -O /tmp/StandardCplusplus.zip
   - unzip /tmp/StandardCplusplus.zip -d /tmp/
-  - mv /tmp/StandardCplusplus-* $HOME/Arduino/libraries/StandardCplusplus
+  - mv /tmp/StandardCplusplus-* /tmp/StandardCplusplus
 
 script:
-  - /tmp/arduino/arduino --verify --board $BOARD .
+  - platformio ci --lib="/tmp/Bounce2" --lib="/tmp/StandardCplusplus" --board=$BOARD
 
 notifications:
   email:
