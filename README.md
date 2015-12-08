@@ -8,14 +8,16 @@ If you have dumb a desk with only two buttons – one for driving up and one for
 
 The sketch depends on the following Arduino libraries:
 
-* [EEPROM](https://www.arduino.cc/en/Reference/EEPROM) (standard library)
-* [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal) (standard library)
-* [Standard C++ for Arduino](https://github.com/maniacbug/StandardCplusplus)
-* [Bounce2](https://github.com/thomasfredericks/Bounce2)
-* [Time](http://www.pjrc.com/teensy/td_libs_Time.html)
-* [TimeAlarms](http://www.pjrc.com/teensy/td_libs_TimeAlarms.html)
+| Library | Version | Library Manager package | Notes |
+|---------|---------|-----------------------|-------|
+| [EEPROM](https://www.arduino.cc/en/Reference/EEPROM) |  | – | _standard library_ |
+| [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal) | 1.0 | [`LiquidCrystal:1.0.4`](https://github.com/arduino-libraries/LiquidCrystal/releases/tag/1.0.4) | _standard library_ |
+| [Standard C++ for Arduino](https://github.com/maniacbug/StandardCplusplus) |  | _missing_ | _not adapted for Library Manager_ |
+| [Bounce2](https://github.com/thomasfredericks/Bounce2) | 2.1 | [`Bounce2:2.1.0`](https://github.com/thomasfredericks/Bounce2/releases/tag/V2.1) |  |
+| [Time](http://www.pjrc.com/teensy/td_libs_Time.html) | 1.5 | [`Time:1.5.0`](https://github.com/PaulStoffregen/Time/releases/tag/v1.5) |  |
+| [TimeAlarms](http://www.pjrc.com/teensy/td_libs_TimeAlarms.html) | 1.4 | [`TimeAlarms:1.4.0`](https://github.com/PaulStoffregen/TimeAlarms/releases/tag/1.4.1) |  |
 
-The standard libraries are bundled together with the Arduino IDE; the others, however, need to be downloaded and unpacked to your sketchbook's library folder: `/path/to/sketchbook/libraries/`.
+The standard libraries are bundled together with the Arduino IDE. The others must to be added manually, either via the [Library Manager](https://www.arduino.cc/en/Guide/Libraries#toc3) (new in Arduino IDE 1.6.2), or by downloading and unpacking them to your sketchbook's library folder: `/path/to/sketchbook/libraries/`.
 
 
 ## Schematics
