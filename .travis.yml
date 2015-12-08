@@ -13,6 +13,10 @@ before_install:
 install:
   - arduino --install-library "Bounce2:2.1.0,Time:1.5.0,TimeAlarms:1.4.0"
 
+  - wget https://github.com/maniacbug/StandardCplusplus/archive/af18241.zip -O /tmp/StandardCplusplus.zip
+  - unzip /tmp/StandardCplusplus.zip -d /tmp/
+  - mv /tmp/StandardCplusplus-* $HOME/Arduino/libraries/StandardCplusplus
+
 script:
   - arduino --verify --board arduino:avr:leonardo .
 
