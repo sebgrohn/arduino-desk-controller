@@ -8,11 +8,12 @@
 #include "HeightDeskController.h"
 
 
+typedef std::map<String, double> PositionMap;
+typedef std::pair<String, double> Position;
+
+
 class PositionDeskControllerParams : public HeightDeskControllerParams {
 public:
-  typedef std::map<String, double> position_map;
-  typedef std::pair<String, double> position;
-  
   PositionDeskControllerParams();
   
   PositionDeskControllerParams(const char& upPin, const char& downPin);
@@ -24,28 +25,30 @@ public:
   PositionDeskControllerParams(
     const char& upPin, const char& downPin,
     const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed,
-    const position_map& positions);
+    const PositionMap& positions);
   
-  position getPosition(const String& name) const;
-  position getPosition(const double& height) const;
+  Position getPosition(const String& name) const;
+  Position getPosition(const double& height) const;
   
-  position getHigherPosition(const String& name) const;
-  position getLowerPosition(const String& name) const;
+  Position getHigherPosition(const String& name) const;
+  Position getLowerPosition(const String& name) const;
   
-  position getHigherPosition(const double& height) const;
-  position getLowerPosition(const double& height) const;
+  Position getHigherPosition(const double& height) const;
+  Position getLowerPosition(const double& height) const;
   
-  position getHighestPosition() const;
-  position getLowestPosition() const;
+  Position getHighestPosition() const;
+  Position getLowestPosition() const;
   
   void insertPosition(const String& name, const double& height);
   void erasePosition(const String& name);
   
 private:
-  typedef std::map<double, String> rev_position_map;
+  typedef std::map<double, String> RevPositionMap;
+  typedef RevPositionMap::const_iterator RevPositionIterator;
+  typedef PositionMap::const_iterator PositionIterator;
   
-  position_map     positions;
-  rev_position_map revPositions;
+  PositionMap    positions;
+  RevPositionMap revPositions;
   
   void setRevPositions();
 };
@@ -71,7 +74,7 @@ public:
   void setLowestPosition();
   
 private:
-  void setHeightImpl(const PositionDeskControllerParams::position& newPosition);
+  void setHeightImpl(const Position& newPosition);
 };
 
 #endif

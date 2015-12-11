@@ -80,8 +80,8 @@ Bounce downDebouncer   = Bounce();
 EEPROMField<double> eepromCurrentHeight = EEPROMField<double>(EEPROMFieldParams<double>(CURRENT_HEIGHT_EEPROM_ADDRESS), minHeight);
 EEPROMField<double> eepromTargetHeight  = EEPROMField<double>(EEPROMFieldParams<double>(TARGET_HEIGHT_EEPROM_ADDRESS),  eepromCurrentHeight);
 
-PositionDeskControllerParams::position_map createControllerPositions() {
-  PositionDeskControllerParams::position_map controllerPositions = PositionDeskControllerParams::position_map();
+PositionMap createControllerPositions() {
+  PositionMap controllerPositions = PositionMap();
   controllerPositions[minPosition]   = minHeight;
   controllerPositions[maxPosition]   = maxHeight;
   controllerPositions[sitPosition]   = sitHeight;
@@ -336,7 +336,7 @@ void printLength(Print& printer, const double& length) {
   }
 }
 void printHeight(Print& printer, const double& height) {
-  const PositionDeskControllerParams::position position = controller.params.getPosition(height);
+  const Position position = controller.params.getPosition(height);
   if (position.first != String()) {
     printer.print(position.first);
   } else {

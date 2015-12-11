@@ -18,15 +18,15 @@ PositionDeskControllerParams::PositionDeskControllerParams(
 PositionDeskControllerParams::PositionDeskControllerParams(
   const char& upPin, const char& downPin,
   const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed,
-  const position_map& positions)
+  const PositionMap& positions)
     : HeightDeskControllerParams(upPin, downPin, minHeight, maxHeight, upSpeed, downSpeed),
       positions(positions) {
   // TODO validate min/max
   setRevPositions();
 }
 
-PositionDeskControllerParams::position PositionDeskControllerParams::getPosition(const String& name) const {
-  position_map::const_iterator it = positions.find(name);
+Position PositionDeskControllerParams::getPosition(const String& name) const {
+  PositionIterator it = positions.find(name);
   if (it != positions.end()) {
     return *it;
   } else {
@@ -35,8 +35,8 @@ PositionDeskControllerParams::position PositionDeskControllerParams::getPosition
   }
 }
 
-PositionDeskControllerParams::position PositionDeskControllerParams::getPosition(const double& height) const {
-  rev_position_map::const_iterator it = revPositions.find(height);
+Position PositionDeskControllerParams::getPosition(const double& height) const {
+  RevPositionIterator it = revPositions.find(height);
   if (it != revPositions.end()) {
     return std::make_pair(it->second, it->first);
   } else {
@@ -45,8 +45,8 @@ PositionDeskControllerParams::position PositionDeskControllerParams::getPosition
   }
 }
 
-PositionDeskControllerParams::position PositionDeskControllerParams::getHigherPosition(const String& name) const {
-  rev_position_map::const_iterator it = revPositions.find(getPosition(name).second);
+Position PositionDeskControllerParams::getHigherPosition(const String& name) const {
+  RevPositionIterator it = revPositions.find(getPosition(name).second);
   if (it == revPositions.end()) {
     // empty / fail-name
     return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
@@ -60,8 +60,8 @@ PositionDeskControllerParams::position PositionDeskControllerParams::getHigherPo
   return std::make_pair(it->second, it->first);
 }
 
-PositionDeskControllerParams::position PositionDeskControllerParams::getLowerPosition(const String& name) const {
-  rev_position_map::const_iterator it = revPositions.find(getPosition(name).second);
+Position PositionDeskControllerParams::getLowerPosition(const String& name) const {
+  RevPositionIterator it = revPositions.find(getPosition(name).second);
   if (it == revPositions.end()) {
     // empty / fail-name
     return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
@@ -73,9 +73,9 @@ PositionDeskControllerParams::position PositionDeskControllerParams::getLowerPos
   return std::make_pair(it->second, it->first);
 }
 
-PositionDeskControllerParams::position PositionDeskControllerParams::getHigherPosition(const double& height) const {
-  rev_position_map::const_iterator itLower = revPositions.lower_bound(height);
-  rev_position_map::const_iterator itUpper = revPositions.upper_bound(height);
+Position PositionDeskControllerParams::getHigherPosition(const double& height) const {
+  RevPositionIterator itLower = revPositions.lower_bound(height);
+  RevPositionIterator itUpper = revPositions.upper_bound(height);
   
   if (itLower == revPositions.end()) {
     // empty / higher than highest
@@ -89,9 +89,9 @@ PositionDeskControllerParams::position PositionDeskControllerParams::getHigherPo
   }
 }
 
-PositionDeskControllerParams::position PositionDeskControllerParams::getLowerPosition(const double& height) const {
-  rev_position_map::const_iterator itLower = revPositions.lower_bound(height);
-  rev_position_map::const_iterator itUpper = revPositions.upper_bound(height);
+Position PositionDeskControllerParams::getLowerPosition(const double& height) const {
+  RevPositionIterator itLower = revPositions.lower_bound(height);
+  RevPositionIterator itUpper = revPositions.upper_bound(height);
   
   if (itUpper == revPositions.begin()) {
     // empty / lower than lowest
@@ -104,8 +104,8 @@ PositionDeskControllerParams::position PositionDeskControllerParams::getLowerPos
   return std::make_pair(itLower->second, itLower->first);
 }
 
-PositionDeskControllerParams::position PositionDeskControllerParams::getHighestPosition() const {
-  rev_position_map::const_iterator it = revPositions.end();
+Position PositionDeskControllerParams::getHighestPosition() const {
+  RevPositionIterator it = revPositions.end();
   if (it == revPositions.begin()) {
     // empty
     return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
@@ -114,8 +114,8 @@ PositionDeskControllerParams::position PositionDeskControllerParams::getHighestP
   return std::make_pair(it->second, it->first);
 }
 
-PositionDeskControllerParams::position PositionDeskControllerParams::getLowestPosition() const {
-  rev_position_map::const_iterator it = revPositions.begin();
+Position PositionDeskControllerParams::getLowestPosition() const {
+  RevPositionIterator it = revPositions.begin();
   if (it == revPositions.end()) {
     // empty
     return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
@@ -138,7 +138,7 @@ void PositionDeskControllerParams::erasePosition(const String& name) {
 void PositionDeskControllerParams::setRevPositions() {
   revPositions.clear();
   
-  for (position_map::const_iterator it = positions.begin(); it != positions.end(); it++) {
+  for (PositionIterator it = positions.begin(); it != positions.end(); it++) {
     revPositions[it->second] = it->first;
   }
 }
@@ -165,17 +165,17 @@ boolean PositionDeskController::isAtTargetPosition() const {
 }
 
 void PositionDeskController::setPosition(const String& newPositionName) {
-  const PositionDeskControllerParams::position newPosition = params.getPosition(newPositionName);
+  const Position newPosition = params.getPosition(newPositionName);
   setHeightImpl(newPosition);
 }
 
 void PositionDeskController::raisePosition() {
-  const PositionDeskControllerParams::position newPosition = params.getHigherPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
+  const Position newPosition = params.getHigherPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
   setHeightImpl(newPosition);
 }
 
 void PositionDeskController::lowerPosition() {
-  const PositionDeskControllerParams::position newPosition = params.getLowerPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
+  const Position newPosition = params.getLowerPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
   setHeightImpl(newPosition);
 }
 
@@ -187,7 +187,7 @@ void PositionDeskController::setLowestPosition() {
   setHeightImpl(params.getLowestPosition());
 }
 
-void PositionDeskController::setHeightImpl(const PositionDeskControllerParams::position& newPosition) {
+void PositionDeskController::setHeightImpl(const Position& newPosition) {
   if (!isnan(newPosition.second)) {
     HeightDeskController::setHeight(newPosition.second);
   }
