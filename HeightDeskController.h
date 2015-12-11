@@ -62,7 +62,7 @@ public:
   virtual void setDrivingDirection(const DeskDrivingDirection& direction);
   
 private:
-  static const double HEIGHT_DIFF_TOLERANCE = 0.001;
+  static constexpr double HEIGHT_DIFF_TOLERANCE = 0.001;
   
   double targetHeight;
   double lastStoppedHeight;

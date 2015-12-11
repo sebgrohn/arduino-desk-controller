@@ -80,8 +80,8 @@ Bounce downDebouncer   = Bounce();
 EEPROMField<double> eepromCurrentHeight = EEPROMField<double>(EEPROMFieldParams<double>(CURRENT_HEIGHT_EEPROM_ADDRESS), minHeight);
 EEPROMField<double> eepromTargetHeight  = EEPROMField<double>(EEPROMFieldParams<double>(TARGET_HEIGHT_EEPROM_ADDRESS),  eepromCurrentHeight);
 
-std::map<String, double> createControllerPositions() {
-  std::map<String, double> controllerPositions = std::map<String, double>();
+PositionDeskControllerParams::position_map createControllerPositions() {
+  PositionDeskControllerParams::position_map controllerPositions = PositionDeskControllerParams::position_map();
   controllerPositions[minPosition]   = minHeight;
   controllerPositions[maxPosition]   = maxHeight;
   controllerPositions[sitPosition]   = sitHeight;
