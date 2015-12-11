@@ -1,5 +1,7 @@
 language: c
 
+sudo: false
+
 env:
   - ARDUINO_VERSION=1.6.6 BOARD=arduino:avr:leonardo
 
@@ -10,18 +12,17 @@ before_install:
 
   - wget http://downloads.arduino.cc/arduino-$ARDUINO_VERSION-linux64.tar.xz
   - tar xf arduino-$ARDUINO_VERSION-linux64.tar.xz
-  - sudo mv arduino-$ARDUINO_VERSION /usr/local/share/arduino
-  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+  - mv arduino-$ARDUINO_VERSION /tmp/arduino
 
 install:
-  - arduino --install-library "Bounce2:2.1.0,Time:1.5.0,TimeAlarms:1.4.0"
+  - /tmp/arduino/arduino --install-library "Bounce2:2.1.0,Time:1.5.0,TimeAlarms:1.4.0"
 
   - wget https://github.com/maniacbug/StandardCplusplus/archive/af18241.zip -O /tmp/StandardCplusplus.zip
   - unzip /tmp/StandardCplusplus.zip -d /tmp/
   - mv /tmp/StandardCplusplus-* $HOME/Arduino/libraries/StandardCplusplus
 
 script:
-  - arduino --verify --board $BOARD .
+  - /tmp/arduino/arduino --verify --board $BOARD .
 
 notifications:
   email:
