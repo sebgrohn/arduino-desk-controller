@@ -49,6 +49,10 @@ TimerDeskController::TimerDeskController(const TimerDeskControllerParams& params
   //scheduleNextPositionChange();
 }
 
+double TimerDeskController::getNextHeight() const {
+  return params.getPosition(nextPosition).second;
+}
+
 String TimerDeskController::getNextPosition() const {
   return nextPosition;
 }

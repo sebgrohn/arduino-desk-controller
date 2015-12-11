@@ -72,6 +72,7 @@ public:
   TimerDeskController(const TimerDeskControllerParams& params, const double& initialHeight);
   TimerDeskController(const TimerDeskControllerParams& params, const double& initialHeight, const double& initialTargetHeight);
   
+  double getNextHeight() const;
   String getNextPosition() const;
   time_t getNextPositionChangeTime() const;
   
