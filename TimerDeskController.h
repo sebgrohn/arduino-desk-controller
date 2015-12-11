@@ -108,6 +108,25 @@ private:
   time_t alarmTime;
   
   void processPositionChange();
+  
+  // DEBUG remove
+  void printDigits(Print& printer, const int& digits) {
+    if(digits < 10) {
+      printer.print('0');
+    }
+    printer.print(digits);
+  }
+  void printTimeShort(Print& printer, const time_t& time) {
+    if (time != dtINVALID_TIME) {
+      printDigits(printer, hour(time));
+      printer.print(':');
+      printDigits(printer, minute(time));
+      printer.print(':');
+      printDigits(printer, second(time));
+    } else {
+      printer.print(F("     "));
+    }
+  }
 };
 
 #endif

@@ -80,6 +80,10 @@ boolean TimerDeskController::update() {
 TimerDeskController::controller_vector TimerDeskController::controllerInstances = TimerDeskController::controller_vector();
 
 void TimerDeskController::processPositionChangeStatic(const int& index) {
+  // DEBUG remove
+  Serial.print(F("\tProcessing: "));
+  Serial.println(index);
+  
   if (index < controllerInstances.size()) {
     controllerInstances[index]->processPositionChange();
   }
@@ -133,13 +137,35 @@ void TimerDeskController::scheduleNextPositionChange() {
   // TODO adjust for lunch and pause times?
   
   if(alarmId == dtINVALID_ALARM_ID) {
+    // DEBUG remove
+    Serial.print(F("\tNext alarm time (first): "));
+    printTimeShort(Serial, alarmTime);
+    Serial.print(F(" \""));
+    Serial.print(targetPosition);
+    Serial.print(F("\" \""));
+    Serial.print(nextPosition);
+    Serial.println('"');
+    
     alarmId = Alarm.alarmOnce(alarmTime, getProcessPositionChangePtr(this));
   } else {
+    // DEBUG remove
+    Serial.print(F("Next alarm time (other): "));
+    printTimeShort(Serial, alarmTime);
+    Serial.print(F(" \""));
+    Serial.print(targetPosition);
+    Serial.print(F("\" \""));
+    Serial.print(nextPosition);
+    Serial.println('"');
+    
     Alarm.write(alarmId, alarmTime);
   }
 }
 
 void TimerDeskController::processPositionChange() {
+  // DEBUG remove
+  Serial.print(F("\tProcessing: "));
+  Serial.println(nextPosition);
+  
   alarmId = dtINVALID_ALARM_ID;
   setPosition(nextPosition);
 }
