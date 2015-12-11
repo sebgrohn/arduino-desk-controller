@@ -15,7 +15,13 @@ before_install:
   - mv arduino-$ARDUINO_VERSION /tmp/arduino
 
 install:
-  - /tmp/arduino/arduino --install-library "Bounce2:2.1.0,Time:1.5.0,TimeAlarms:1.4.0"
+  # /tmp/arduino/arduino --install-library "Bounce2:2.1.0,Time:1.5.0,TimeAlarms:1.4.0"
+  - /tmp/arduino/arduino --install-library "Bounce2:2.1.0,TimeAlarms:1.4.0"
+
+  # NOTE Time is not found by Travis CI although it should be available
+  - wget https://github.com/PaulStoffregen/Time/archive/v1.5.zip -O /tmp/Time.zip
+  - unzip /tmp/Time.zip -d /tmp/
+  - mv /tmp/Time-* $HOME/Arduino/libraries/Time
 
   - wget https://github.com/maniacbug/StandardCplusplus/archive/af18241.zip -O /tmp/StandardCplusplus.zip
   - unzip /tmp/StandardCplusplus.zip -d /tmp/
