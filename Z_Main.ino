@@ -129,11 +129,11 @@ void setup()  {
   
   printDateTime(Serial);
   Serial.print(F(" Initial height:        "));
-  printHeight(Serial, controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight());
+  printHeight(Serial, controller.isAtTargetPosition() ? controller.getTargetHeight() : controller.getCurrentHeight(), controller.params);
   Serial.println();
   printDateTime(Serial);
   Serial.print(F(" Initial target height: "));
-  printHeight(Serial, controller.getTargetHeight());
+  printHeight(Serial, controller.getTargetHeight(), controller.params);
   Serial.println();
   printDateTime(Serial);
   Serial.println(enable ? F(" Enabled") : F(" Disabled"));
@@ -194,7 +194,7 @@ void loop()  {
     
     printDateTime(Serial);
     Serial.print(F(" Reached height:     "));
-    printHeight(Serial, targetHeight);
+    printHeight(Serial, targetHeight, controller.params);
     Serial.println();
     
     eepromCurrentHeight = targetHeight;
@@ -254,96 +254,6 @@ void processSyncMessage() {
   }
 }
 
-void printDateTime(Print& printer, const time_t& time) {
-  if (time != dtINVALID_TIME) {
-    printer.print(year(time));
-    printer.print('-');
-    printDigits(printer, month(time));
-    printer.print('-');
-    printDigits(printer, day(time));
-    printer.print(' ');
-    printDigits(printer, hour(time));
-    printer.print(':');
-    printDigits(printer, minute(time));
-    printer.print(':');
-    printDigits(printer, second(time));
-  } else {
-    printer.print(F("                   "));
-  }
-}
-void printDateTime(Print& printer) {
-  if (timeStatus() != timeNotSet) {
-    printDateTime(printer, now());
-  } else {
-    printer.print(F("xxxx-xx-xx --:--:--"));
-  }
-}
-void printTimeShort(Print& printer, const time_t& time) {
-  if (time != dtINVALID_TIME) {
-    printDigits(printer, hour(time));
-    printer.print(':');
-    printDigits(printer, minute(time));
-  } else {
-    printer.print(F("     "));
-  }
-}
-void printTimeShort(Print& printer) {
-  if (timeStatus() != timeNotSet) {
-    printTimeShort(printer, now());
-  } else {
-    printer.print(F("--:--"));
-  }
-}
-void printTimeInterval(Print& printer, const time_t& timeInterval) {
-  time_t timeIntervalRem = timeInterval;
-  const int days  = timeIntervalRem / 86400; timeIntervalRem -= days  * 86400;
-  const int hours = timeIntervalRem / 3600;  timeIntervalRem -= hours * 3600;
-  const int mins  = timeIntervalRem / 60;    timeIntervalRem -= mins  * 60;
-  const int secs  = timeIntervalRem;
-  
-  if (days > 0) {
-    printer.print(days + 1);
-    printer.print(F(" days"));
-  } else if (hours > 8) {
-    printer.print(hours + 1);
-    printer.print(F(" h  "));
-  } else if (hours > 0) {
-    printer.print(mins == 59 ? hours + 1 : hours);
-    printer.print(F(":"));
-    printDigits(printer, (mins + 1) % 60);
-    printer.print(F(" h"));
-  } else if (mins > 0) {
-    printer.print(mins + 1);
-    printer.print(F(" min "));
-  } else if (secs > 0) {
-    printer.print(secs + 1);
-    printer.print(F(" s   "));
-  }
-}
-void printDigits(Print& printer, const int& digits) {
-  if(digits < 10) {
-    printer.print('0');
-  }
-  printer.print(digits);
-}
-
-void printLength(Print& printer, const double& length) {
-  if (!isnan(length)) {
-    printer.print(length, 2);
-    printer.print(F(" m"));
-  } else {
-    printer.print(F("---- m"));
-  }
-}
-void printHeight(Print& printer, const double& height) {
-  const Position position = controller.params.getPosition(height);
-  if (position.first != String()) {
-    printer.print(position.first);
-  } else {
-    printLength(printer, height);
-  }
-}
-
 void setupDebouncer(Bounce& debouncer, const int& pin) {
   pinMode(pin, INPUT_PULLUP);
   debouncer.attach(pin);
@@ -357,7 +267,7 @@ void stopDesk() {
   
   printDateTime(Serial);
   Serial.print(F(" Stopped at height:  "));
-  printHeight(Serial, currentHeight);
+  printHeight(Serial, currentHeight, controller.params);
   Serial.println();
   
   eepromCurrentHeight = currentHeight;
@@ -368,7 +278,7 @@ void abortDeskDrive() {
   
   printDateTime(Serial);
   Serial.print(F(" Drove to height:    "));
-  printHeight(Serial, currentHeight);
+  printHeight(Serial, currentHeight, controller.params);
   Serial.println();
   
   eepromCurrentHeight = currentHeight;
@@ -378,7 +288,7 @@ void resumeDeskDriving() {
   
   printDateTime(Serial);
   Serial.print(F(" Driving to height:  "));
-  printHeight(Serial, controller.getTargetHeight());
+  printHeight(Serial, controller.getTargetHeight(), controller.params);
   Serial.println();
 }
 void setDeskPosition(const String& targetPosition) {
@@ -388,7 +298,7 @@ void setDeskPosition(const String& targetPosition) {
   
   printDateTime(Serial);
   Serial.print(F(" Driving to height:  "));
-  printHeight(Serial, targetHeight);
+  printHeight(Serial, targetHeight, controller.params);
   Serial.println();
   
   eepromTargetHeight = targetHeight;
@@ -400,7 +310,7 @@ void raiseDeskPosition() {
   
   printDateTime(Serial);
   Serial.print(F(" Raising to height:  "));
-  printHeight(Serial, targetHeight);
+  printHeight(Serial, targetHeight, controller.params);
   Serial.println();
   
   eepromTargetHeight = targetHeight;
@@ -412,7 +322,7 @@ void lowerDeskPosition() {
   
   printDateTime(Serial);
   Serial.print(F(" Lowering to height: "));
-  printHeight(Serial, targetHeight);
+  printHeight(Serial, targetHeight, controller.params);
   Serial.println();
   
   eepromTargetHeight = targetHeight;
@@ -447,14 +357,14 @@ void refreshDisplay(LiquidCrystal& lcd) {
   // current height, driving direction, target height
   if (controller.isAtTargetPosition()) {
     lcd.setCursor(0, 1);
-    printHeight(lcd, targetHeight);
+    printHeight(lcd, targetHeight, controller.params);
     
     lcd.setCursor(8, 1);
     lcd.print(F("        "));
   } else {
     // current height
     lcd.setCursor(0, 1);
-    printHeight(lcd, currentHeight);
+    printHeight(lcd, currentHeight, controller.params);
     
     // driving direction
     lcd.setCursor(8, 1);
@@ -466,6 +376,6 @@ void refreshDisplay(LiquidCrystal& lcd) {
     
     // target height
     lcd.setCursor(10, 1);
-    printHeight(lcd, targetHeight);
+    printHeight(lcd, targetHeight, controller.params);
   }
 }
