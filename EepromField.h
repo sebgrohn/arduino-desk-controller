@@ -2,7 +2,6 @@
 #define EepromField_h
 
 #include <Arduino.h>
-#include <EEPROM.h>
 
 
 template<class T>

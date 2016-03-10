@@ -1,6 +1,8 @@
 
 #include "EepromField.h"
 
+#include <EEPROM.h>
+
 
 template<class T>
 const unsigned int EEPROMFieldParams<T>::size = sizeof(T);
