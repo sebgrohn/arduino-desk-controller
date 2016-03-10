@@ -88,19 +88,13 @@ public:
 private:
   typedef std::vector<TimerDeskController *> controller_vector;
   
-  static const unsigned int numControllerInstances = 8;
+  static const unsigned int numControllerInstances = 2;
   static controller_vector controllerInstances;
   
   static void processPositionChangeStatic(const int& index);
   static OnTick_t getProcessPositionChangePtr(TimerDeskController * const controller);
   static void processPositionChange_0();
   static void processPositionChange_1();
-  static void processPositionChange_2();
-  static void processPositionChange_3();
-  static void processPositionChange_4();
-  static void processPositionChange_5();
-  static void processPositionChange_6();
-  static void processPositionChange_7();
   
   time_t changedPositionTime;
   String nextPosition;

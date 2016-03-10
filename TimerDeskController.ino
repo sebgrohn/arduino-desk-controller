@@ -94,12 +94,6 @@ OnTick_t TimerDeskController::getProcessPositionChangePtr(TimerDeskController * 
       switch (i) {
       case 0:  return processPositionChange_0;
       case 1:  return processPositionChange_1;
-      case 2:  return processPositionChange_2;
-      case 3:  return processPositionChange_3;
-      case 4:  return processPositionChange_4;
-      case 5:  return processPositionChange_5;
-      case 6:  return processPositionChange_6;
-      case 7:  return processPositionChange_7;
       default: return NULL;
       }
     }
@@ -108,12 +102,6 @@ OnTick_t TimerDeskController::getProcessPositionChangePtr(TimerDeskController * 
 }
 void TimerDeskController::processPositionChange_0() { processPositionChangeStatic(0); }
 void TimerDeskController::processPositionChange_1() { processPositionChangeStatic(1); }
-void TimerDeskController::processPositionChange_2() { processPositionChangeStatic(2); }
-void TimerDeskController::processPositionChange_3() { processPositionChangeStatic(3); }
-void TimerDeskController::processPositionChange_4() { processPositionChangeStatic(4); }
-void TimerDeskController::processPositionChange_5() { processPositionChangeStatic(5); }
-void TimerDeskController::processPositionChange_6() { processPositionChangeStatic(6); }
-void TimerDeskController::processPositionChange_7() { processPositionChangeStatic(7); }
 
 void TimerDeskController::scheduleNextPositionChange() {
   const String targetPosition = (isAtTargetPosition() ? getTargetPosition() : getCurrentPosition());
