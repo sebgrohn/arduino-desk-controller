@@ -23,9 +23,11 @@ struct BaseDeskControllerParams {
 
 class BaseDeskController {
 public:
-  const BaseDeskControllerParams params;
+  typedef BaseDeskControllerParams Params;
   
-  BaseDeskController(const BaseDeskControllerParams& params);
+  const Params params;
+  
+  BaseDeskController(const Params& params);
   
   virtual ~BaseDeskController();
   

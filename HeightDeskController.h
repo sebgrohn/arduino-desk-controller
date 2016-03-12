@@ -38,10 +38,12 @@ struct HeightDeskControllerParams : public BaseDeskControllerParams {
 
 class HeightDeskController : public BaseDeskController {
 public:
-  const HeightDeskControllerParams params;
+  typedef HeightDeskControllerParams Params;
   
-  HeightDeskController(const HeightDeskControllerParams& params, const double& initialHeight);
-  HeightDeskController(const HeightDeskControllerParams& params, const double& initialHeight, const double& initialTargetHeight);
+  const Params params;
+  
+  HeightDeskController(const Params& params, const double& initialHeight);
+  HeightDeskController(const Params& params, const double& initialHeight, const double& initialTargetHeight);
   
   double getTargetHeight() const;
   double getCurrentHeight() const;

@@ -39,14 +39,14 @@ T EEPROMField<T>::getEmptyValue() {
 }
 
 template<class T>
-EEPROMField<T>::EEPROMField(EEPROMFieldParams<T> params)
+EEPROMField<T>::EEPROMField(Params params)
     : params(params) {
   refresh();
   latestValue = storedValue;
 }
 
 template<class T>
-EEPROMField<T>::EEPROMField(EEPROMFieldParams<T> params, const T& defaultValue)
+EEPROMField<T>::EEPROMField(Params params, const T& defaultValue)
     : params(params) {
   refresh();
   if (isEmpty()) {

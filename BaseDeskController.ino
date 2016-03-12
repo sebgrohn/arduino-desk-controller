@@ -9,7 +9,7 @@ BaseDeskControllerParams::BaseDeskControllerParams(const char& upPin, const char
       downPin(downPin) {}
 
 
-BaseDeskController::BaseDeskController(const BaseDeskControllerParams& params)
+BaseDeskController::BaseDeskController(const Params& params)
     : params(params) {
   pinMode(params.upPin,   OUTPUT);
   pinMode(params.downPin, OUTPUT);

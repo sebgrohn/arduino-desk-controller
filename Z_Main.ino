@@ -54,9 +54,9 @@ Bounce enableDebouncer = Bounce();
 Bounce upDebouncer     = Bounce();
 Bounce downDebouncer   = Bounce();
 
-EEPROMField<double> eepromCurrentHeight = EEPROMField<double>(EEPROMFieldParams<double>(CURRENT_HEIGHT_EEPROM_ADDRESS), sitHeight);
-EEPROMField<double> eepromTargetHeight  = EEPROMField<double>(EEPROMFieldParams<double>(TARGET_HEIGHT_EEPROM_ADDRESS), eepromCurrentHeight);
-EEPROMField<boolean> eepromEnabled      = EEPROMField<boolean>(EEPROMFieldParams<boolean>(ENABLED_EEPROM_ADDRESS), true);
+EEPROMField<double>  eepromCurrentHeight(EEPROMField<double>::Params(CURRENT_HEIGHT_EEPROM_ADDRESS), sitHeight);
+EEPROMField<double>  eepromTargetHeight(EEPROMField<double>::Params(TARGET_HEIGHT_EEPROM_ADDRESS), eepromCurrentHeight);
+EEPROMField<boolean> eepromEnabled(EEPROMField<boolean>::Params(ENABLED_EEPROM_ADDRESS), true);
 
 PositionMap createControllerPositions() {
   PositionMap controllerPositions = PositionMap();
@@ -66,7 +66,7 @@ PositionMap createControllerPositions() {
   controllerPositions[standPosition] = standHeight;
   return controllerPositions;
 }
-PositionDeskControllerParams controllerParams(
+PositionDeskController::Params controllerParams(
     upControlPin, downControlPin,
     minHeight, maxHeight, upSpeed, downSpeed,
     createControllerPositions());

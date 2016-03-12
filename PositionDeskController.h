@@ -56,10 +56,12 @@ private:
 
 class PositionDeskController : public HeightDeskController {
 public:
-  const PositionDeskControllerParams params;
+  typedef PositionDeskControllerParams Params;
   
-  PositionDeskController(const PositionDeskControllerParams& params, const double& initialHeight);
-  PositionDeskController(const PositionDeskControllerParams& params, const double& initialHeight, const double& initialTargetHeight);
+  const Params params;
+  
+  PositionDeskController(const Params& params, const double& initialHeight);
+  PositionDeskController(const Params& params, const double& initialHeight, const double& initialTargetHeight);
   
   String getTargetPosition() const;
   String getCurrentPosition() const;

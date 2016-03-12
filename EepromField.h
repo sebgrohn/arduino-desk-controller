@@ -24,12 +24,14 @@ struct EEPROMFieldParams {
 template<class T>
 class EEPROMField {
 public:
+  typedef EEPROMFieldParams<T> Params;
+  
   static const T emptyValue;
   
-  const EEPROMFieldParams<T> params;
+  const Params params;
   
-  EEPROMField(EEPROMFieldParams<T> params);
-  EEPROMField(EEPROMFieldParams<T> params, const T& defaultValue);
+  EEPROMField(Params params);
+  EEPROMField(Params params, const T& defaultValue);
   
   boolean isEmpty() const;
   boolean isDirty() const;
