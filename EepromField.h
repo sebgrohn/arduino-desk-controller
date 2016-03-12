@@ -6,7 +6,7 @@
 
 template<class T>
 struct EEPROMFieldParams {
-  static const unsigned int size;
+  static const size_t size;
   
   unsigned int address;
   

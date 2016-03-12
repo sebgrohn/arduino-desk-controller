@@ -5,7 +5,7 @@
 
 
 template<class T>
-const unsigned int EEPROMFieldParams<T>::size = sizeof(T);
+const size_t EEPROMFieldParams<T>::size = sizeof(T);
 
 template<class T>
 EEPROMFieldParams<T>::EEPROMFieldParams()
