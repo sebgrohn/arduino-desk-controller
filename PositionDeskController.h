@@ -12,6 +12,7 @@ typedef std::map<String, double> PositionMap;
 typedef std::pair<String, double> Position;
 
 
+template<size_t N>
 class PositionDeskControllerParams : public HeightDeskControllerParams {
 public:
   PositionDeskControllerParams();
@@ -54,9 +55,10 @@ private:
 };
 
 
+template<size_t N>
 class PositionDeskController : public HeightDeskController {
 public:
-  typedef PositionDeskControllerParams Params;
+  typedef PositionDeskControllerParams<N> Params;
   
   const Params params;
   

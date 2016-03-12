@@ -5,17 +5,21 @@
 #include <cmath>
 
 
-PositionDeskControllerParams::PositionDeskControllerParams() {}
+template<size_t N>
+PositionDeskControllerParams<N>::PositionDeskControllerParams() {}
 
-PositionDeskControllerParams::PositionDeskControllerParams(const char& upPin, const char& downPin)
+template<size_t N>
+PositionDeskControllerParams<N>::PositionDeskControllerParams(const char& upPin, const char& downPin)
     : HeightDeskControllerParams(upPin, downPin) {}
 
-PositionDeskControllerParams::PositionDeskControllerParams(
+template<size_t N>
+PositionDeskControllerParams<N>::PositionDeskControllerParams(
   const char& upPin, const char& downPin,
   const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed)
     : HeightDeskControllerParams(upPin, downPin, minHeight, maxHeight, upSpeed, downSpeed) {}
 
-PositionDeskControllerParams::PositionDeskControllerParams(
+template<size_t N>
+PositionDeskControllerParams<N>::PositionDeskControllerParams(
   const char& upPin, const char& downPin,
   const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed,
   const PositionMap& positions)
@@ -25,7 +29,8 @@ PositionDeskControllerParams::PositionDeskControllerParams(
   setRevPositions();
 }
 
-Position PositionDeskControllerParams::getPosition(const String& name) const {
+template<size_t N>
+Position PositionDeskControllerParams<N>::getPosition(const String& name) const {
   PositionIterator it = positions.find(name);
   if (it != positions.end()) {
     return *it;
@@ -35,7 +40,8 @@ Position PositionDeskControllerParams::getPosition(const String& name) const {
   }
 }
 
-Position PositionDeskControllerParams::getPosition(const double& height) const {
+template<size_t N>
+Position PositionDeskControllerParams<N>::getPosition(const double& height) const {
   RevPositionIterator it = revPositions.find(height);
   if (it != revPositions.end()) {
     return std::make_pair(it->second, it->first);
@@ -45,7 +51,8 @@ Position PositionDeskControllerParams::getPosition(const double& height) const {
   }
 }
 
-Position PositionDeskControllerParams::getHigherPosition(const String& name) const {
+template<size_t N>
+Position PositionDeskControllerParams<N>::getHigherPosition(const String& name) const {
   RevPositionIterator it = revPositions.find(getPosition(name).second);
   if (it == revPositions.end()) {
     // empty / fail-name
@@ -60,7 +67,8 @@ Position PositionDeskControllerParams::getHigherPosition(const String& name) con
   return std::make_pair(it->second, it->first);
 }
 
-Position PositionDeskControllerParams::getLowerPosition(const String& name) const {
+template<size_t N>
+Position PositionDeskControllerParams<N>::getLowerPosition(const String& name) const {
   RevPositionIterator it = revPositions.find(getPosition(name).second);
   if (it == revPositions.end()) {
     // empty / fail-name
@@ -73,7 +81,8 @@ Position PositionDeskControllerParams::getLowerPosition(const String& name) cons
   return std::make_pair(it->second, it->first);
 }
 
-Position PositionDeskControllerParams::getHigherPosition(const double& height) const {
+template<size_t N>
+Position PositionDeskControllerParams<N>::getHigherPosition(const double& height) const {
   RevPositionIterator itLower = revPositions.lower_bound(height);
   RevPositionIterator itUpper = revPositions.upper_bound(height);
   
@@ -89,7 +98,8 @@ Position PositionDeskControllerParams::getHigherPosition(const double& height) c
   }
 }
 
-Position PositionDeskControllerParams::getLowerPosition(const double& height) const {
+template<size_t N>
+Position PositionDeskControllerParams<N>::getLowerPosition(const double& height) const {
   RevPositionIterator itLower = revPositions.lower_bound(height);
   RevPositionIterator itUpper = revPositions.upper_bound(height);
   
@@ -104,7 +114,8 @@ Position PositionDeskControllerParams::getLowerPosition(const double& height) co
   return std::make_pair(itLower->second, itLower->first);
 }
 
-Position PositionDeskControllerParams::getHighestPosition() const {
+template<size_t N>
+Position PositionDeskControllerParams<N>::getHighestPosition() const {
   RevPositionIterator it = revPositions.end();
   if (it == revPositions.begin()) {
     // empty
@@ -114,7 +125,8 @@ Position PositionDeskControllerParams::getHighestPosition() const {
   return std::make_pair(it->second, it->first);
 }
 
-Position PositionDeskControllerParams::getLowestPosition() const {
+template<size_t N>
+Position PositionDeskControllerParams<N>::getLowestPosition() const {
   RevPositionIterator it = revPositions.begin();
   if (it == revPositions.end()) {
     // empty
@@ -123,19 +135,22 @@ Position PositionDeskControllerParams::getLowestPosition() const {
   return std::make_pair(it->second, it->first);
 }
 
-void PositionDeskControllerParams::insertPosition(const String& name, const double& height) {
+template<size_t N>
+void PositionDeskControllerParams<N>::insertPosition(const String& name, const double& height) {
   // TODO validate min/max
   positions[name]      = height;
   revPositions[height] = name;
 }
 
-void PositionDeskControllerParams::erasePosition(const String& name) {
+template<size_t N>
+void PositionDeskControllerParams<N>::erasePosition(const String& name) {
   const double& height = positions[name];
   revPositions.erase(height);
   positions.erase(name);
 }
 
-void PositionDeskControllerParams::setRevPositions() {
+template<size_t N>
+void PositionDeskControllerParams<N>::setRevPositions() {
   revPositions.clear();
   
   for (PositionIterator it = positions.begin(); it != positions.end(); it++) {
@@ -144,50 +159,61 @@ void PositionDeskControllerParams::setRevPositions() {
 }
 
 
-PositionDeskController::PositionDeskController(const Params& params, const double& initialHeight)
+template<size_t N>
+PositionDeskController<N>::PositionDeskController(const Params& params, const double& initialHeight)
     : HeightDeskController(params, initialHeight),
       params(params) {}
 
-PositionDeskController::PositionDeskController(const Params& params, const double& initialHeight, const double& initialTargetHeight)
+template<size_t N>
+PositionDeskController<N>::PositionDeskController(const Params& params, const double& initialHeight, const double& initialTargetHeight)
     : HeightDeskController(params, initialHeight, initialTargetHeight),
       params(params) {}
 
-String PositionDeskController::getTargetPosition() const {
+template<size_t N>
+String PositionDeskController<N>::getTargetPosition() const {
   return params.getPosition(getTargetHeight()).first;
 }
 
-String PositionDeskController::getCurrentPosition() const {
+template<size_t N>
+String PositionDeskController<N>::getCurrentPosition() const {
   return params.getPosition(getCurrentHeight()).first;
 }
 
-boolean PositionDeskController::isAtTargetPosition() const {
+template<size_t N>
+boolean PositionDeskController<N>::isAtTargetPosition() const {
   return isAtTargetHeight() && getTargetPosition() != String();
 }
 
-void PositionDeskController::setPosition(const String& newPositionName) {
+template<size_t N>
+void PositionDeskController<N>::setPosition(const String& newPositionName) {
   const Position newPosition = params.getPosition(newPositionName);
   setHeightImpl(newPosition);
 }
 
-void PositionDeskController::raisePosition() {
+template<size_t N>
+void PositionDeskController<N>::raisePosition() {
   const Position newPosition = params.getHigherPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
   setHeightImpl(newPosition);
 }
 
-void PositionDeskController::lowerPosition() {
+template<size_t N>
+void PositionDeskController<N>::lowerPosition() {
   const Position newPosition = params.getLowerPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
   setHeightImpl(newPosition);
 }
 
-void PositionDeskController::setHighestPosition() {
+template<size_t N>
+void PositionDeskController<N>::setHighestPosition() {
   setHeightImpl(params.getHighestPosition());
 }
 
-void PositionDeskController::setLowestPosition() {
+template<size_t N>
+void PositionDeskController<N>::setLowestPosition() {
   setHeightImpl(params.getLowestPosition());
 }
 
-void PositionDeskController::setHeightImpl(const Position& newPosition) {
+template<size_t N>
+void PositionDeskController<N>::setHeightImpl(const Position& newPosition) {
   if (!isnan(newPosition.second)) {
     HeightDeskController::setHeight(newPosition.second);
   }

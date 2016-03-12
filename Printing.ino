@@ -89,15 +89,6 @@ void printLength(Print& printer, const double& length) {
   }
 }
 
-void printHeight(Print& printer, const double& height, const PositionDeskControllerParams& params) {
-  const Position position = params.getPosition(height);
-  if (position.first != String()) {
-    printer.print(position.first);
-  } else {
-    printLength(printer, height);
-  }
-}
-
 
 void printDigits(Print& printer, const int& digits) {
   if(digits < 10) {

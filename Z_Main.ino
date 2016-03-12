@@ -66,11 +66,11 @@ PositionMap createControllerPositions() {
   controllerPositions[standPosition] = standHeight;
   return controllerPositions;
 }
-PositionDeskController::Params controllerParams(
+PositionDeskController<4>::Params controllerParams(
     upControlPin, downControlPin,
     minHeight, maxHeight, upSpeed, downSpeed,
     createControllerPositions());
-PositionDeskController controller(controllerParams, eepromCurrentHeight, eepromTargetHeight);
+PositionDeskController<4> controller(controllerParams, eepromCurrentHeight, eepromTargetHeight);
 
 LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
 

@@ -13,7 +13,16 @@ void printTimeShort(Print& printer);
 void printTimeInterval(Print& printer, const time_t& timeInterval);
 
 void printLength(Print& printer, const double& length);
-void printHeight(Print& printer, const double& height, const PositionDeskControllerParams& params);
+
+template<size_t N>
+void printHeight(Print& printer, const double& height, const PositionDeskControllerParams<N>& params) {
+  const Position position = params.getPosition(height);
+  if (position.first != String()) {
+    printer.print(position.first);
+  } else {
+    printLength(printer, height);
+  }
+}
 
 void printDigits(Print& printer, const int& digits);
 
