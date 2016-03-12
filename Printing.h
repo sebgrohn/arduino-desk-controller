@@ -17,8 +17,8 @@ void printLength(Print& printer, const double& length);
 template<size_t N>
 void printHeight(Print& printer, const double& height, const PositionDeskControllerParams<N>& params) {
   const Position position = params.getPosition(height);
-  if (position.first != String()) {
-    printer.print(position.first);
+  if (position.name != String()) {
+    printer.print(position.name);
   } else {
     printLength(printer, height);
   }

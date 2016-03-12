@@ -58,18 +58,9 @@ EEPROMField<double>  eepromCurrentHeight(EEPROMField<double>::Params(CURRENT_HEI
 EEPROMField<double>  eepromTargetHeight(EEPROMField<double>::Params(TARGET_HEIGHT_EEPROM_ADDRESS), eepromCurrentHeight);
 EEPROMField<boolean> eepromEnabled(EEPROMField<boolean>::Params(ENABLED_EEPROM_ADDRESS), true);
 
-PositionMap createControllerPositions() {
-  PositionMap controllerPositions = PositionMap();
-  controllerPositions[minPosition]   = minHeight;
-  controllerPositions[maxPosition]   = maxHeight;
-  controllerPositions[sitPosition]   = sitHeight;
-  controllerPositions[standPosition] = standHeight;
-  return controllerPositions;
-}
 PositionDeskController<4>::Params controllerParams(
     upControlPin, downControlPin,
-    minHeight, maxHeight, upSpeed, downSpeed,
-    createControllerPositions());
+    minHeight, maxHeight, upSpeed, downSpeed);
 PositionDeskController<4> controller(controllerParams, eepromCurrentHeight, eepromTargetHeight);
 
 LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
@@ -103,6 +94,10 @@ void setup()  {
   lcd.begin(lcdNumCols, lcdNumRows);
   lcd.clear();
   
+  controller.params.insertPosition(minPosition,   minHeight);
+  controller.params.insertPosition(sitPosition,   sitHeight);
+  controller.params.insertPosition(standPosition, standHeight);
+  controller.params.insertPosition(maxPosition,   maxHeight);
   controller.setEnabled(eepromEnabled);
 }
 

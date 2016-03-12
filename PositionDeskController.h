@@ -8,13 +8,22 @@
 #include "HeightDeskController.h"
 
 
-typedef std::map<String, double> PositionMap;
-typedef std::pair<String, double> Position;
+struct Position {
+  static const Position empty;
+  
+  Position();
+  Position(const String& name, const double& height);
+  
+  String name;
+  double height;
+};
 
 
 template<size_t N>
 class PositionDeskControllerParams : public HeightDeskControllerParams {
 public:
+  static const size_t maxPositions;
+  
   PositionDeskControllerParams();
   
   PositionDeskControllerParams(const char& upPin, const char& downPin);
@@ -23,10 +32,7 @@ public:
     const char& upPin, const char& downPin,
     const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed);
   
-  PositionDeskControllerParams(
-    const char& upPin, const char& downPin,
-    const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed,
-    const PositionMap& positions);
+  size_t getNumPositions() const;
   
   Position getPosition(const String& name) const;
   Position getPosition(const double& height) const;
@@ -34,15 +40,11 @@ public:
   Position getHigherPosition(const double& height) const;
   Position getLowerPosition(const double& height) const;
   
+  int insertPosition(const String& name, const double& height);
+  
 private:
-  typedef std::map<double, String> RevPositionMap;
-  typedef RevPositionMap::const_iterator RevPositionIterator;
-  typedef PositionMap::const_iterator PositionIterator;
-  
-  PositionMap    positions;
-  RevPositionMap revPositions;
-  
-  void setRevPositions();
+  Position positions[N];
+  size_t numPositions;
 };
 
 

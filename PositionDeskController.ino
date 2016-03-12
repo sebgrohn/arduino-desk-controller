@@ -5,6 +5,18 @@
 #include <cmath>
 
 
+const Position Position::empty = Position(String(), std::numeric_limits<double>::quiet_NaN());
+
+Position::Position() {}
+
+Position::Position(const String& name, const double& height)
+    : name(name),
+      height(height) {}
+
+
+template<size_t N>
+const size_t PositionDeskControllerParams<N>::maxPositions = N;
+
 template<size_t N>
 PositionDeskControllerParams<N>::PositionDeskControllerParams() {}
 
@@ -19,78 +31,83 @@ PositionDeskControllerParams<N>::PositionDeskControllerParams(
     : HeightDeskControllerParams(upPin, downPin, minHeight, maxHeight, upSpeed, downSpeed) {}
 
 template<size_t N>
-PositionDeskControllerParams<N>::PositionDeskControllerParams(
-  const char& upPin, const char& downPin,
-  const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed,
-  const PositionMap& positions)
-    : HeightDeskControllerParams(upPin, downPin, minHeight, maxHeight, upSpeed, downSpeed),
-      positions(positions) {
-  // TODO validate min/max
-  setRevPositions();
+size_t PositionDeskControllerParams<N>::getNumPositions() const {
+  return numPositions;
 }
 
 template<size_t N>
 Position PositionDeskControllerParams<N>::getPosition(const String& name) const {
-  PositionIterator it = positions.find(name);
-  if (it != positions.end()) {
-    return *it;
-  } else {
-    // empty / fail-name
-    return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
+  for (int i = 0; i < numPositions; i++) {
+    if (positions[i].name == name) {
+      return positions[i];
+    }
   }
+  // empty / fail-name
+  return Position::empty;
 }
 
 template<size_t N>
 Position PositionDeskControllerParams<N>::getPosition(const double& height) const {
-  RevPositionIterator it = revPositions.find(height);
-  if (it != revPositions.end()) {
-    return std::make_pair(it->second, it->first);
-  } else {
-    // empty / fail-height
-    return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
+  for (int i = 0; i < numPositions; i++) {
+    if (positions[i].height == height) {
+      return positions[i];
+    }
   }
+  // empty / fail-height
+  return Position::empty;
 }
 
 template<size_t N>
 Position PositionDeskControllerParams<N>::getHigherPosition(const double& height) const {
-  RevPositionIterator itLower = revPositions.lower_bound(height);
-  RevPositionIterator itUpper = revPositions.upper_bound(height);
-  
-  if (itLower == revPositions.end()) {
-    // empty / higher than highest
-    return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
+  for (int i = 0; i < numPositions; i++) {
+    if (positions[i].height == height && i == numPositions - 1) {
+      // already highest, return same
+      return positions[i];
+    }
+    if (positions[i].height == height && i < numPositions - 1) {
+      return positions[i + 1];
+    }
+    if (positions[i].height > height) {
+      return positions[i];
+    }
   }
-  if (itUpper == revPositions.end()) {
-    // already highest, return same
-    return std::make_pair(itLower->second, itLower->first);
-  } else {
-    return std::make_pair(itUpper->second, itUpper->first);
-  }
+  // empty / higher than highest
+  return Position::empty;
 }
 
 template<size_t N>
 Position PositionDeskControllerParams<N>::getLowerPosition(const double& height) const {
-  RevPositionIterator itLower = revPositions.lower_bound(height);
-  RevPositionIterator itUpper = revPositions.upper_bound(height);
-  
-  if (itUpper == revPositions.begin()) {
-    // empty / lower than lowest
-    return std::make_pair(String(), std::numeric_limits<double>::quiet_NaN());
+  for (int i = numPositions - 1; i >= 0; i--) {
+    if (positions[i].height == height && i == 0) {
+      // already lowest, return same
+      return positions[i];
+    }
+    if (positions[i].height == height && i > 0) {
+      return positions[i - 1];
+    }
+    if (positions[i].height < height) {
+      return positions[i];
+    }
   }
-  if (itLower != revPositions.begin()) {
-    // lower, if not already lowest
-    itLower--;
-  }
-  return std::make_pair(itLower->second, itLower->first);
+  // empty / lower than lowest
+  return Position::empty;
 }
 
 template<size_t N>
-void PositionDeskControllerParams<N>::setRevPositions() {
-  revPositions.clear();
-  
-  for (PositionIterator it = positions.begin(); it != positions.end(); it++) {
-    revPositions[it->second] = it->first;
+int PositionDeskControllerParams<N>::insertPosition(const String& name, const double& height) {
+  if (numPositions == maxPositions) {
+    // positions array full
+    return maxPositions;
   }
+  if (numPositions > 0 && positions[numPositions - 1].height >= height) {
+    // not inserted in order (lowest to highest)
+    return -1;
+  }
+  
+  const size_t insertIndex = numPositions;
+  numPositions++;
+  positions[insertIndex] = Position(name, constrain(height, minHeight, maxHeight));
+  return insertIndex;
 }
 
 
@@ -106,12 +123,12 @@ PositionDeskController<N>::PositionDeskController(const Params& params, const do
 
 template<size_t N>
 String PositionDeskController<N>::getTargetPosition() const {
-  return params.getPosition(getTargetHeight()).first;
+  return params.getPosition(getTargetHeight()).name;
 }
 
 template<size_t N>
 String PositionDeskController<N>::getCurrentPosition() const {
-  return params.getPosition(getCurrentHeight()).first;
+  return params.getPosition(getCurrentHeight()).name;
 }
 
 template<size_t N>
@@ -121,26 +138,26 @@ boolean PositionDeskController<N>::isAtTargetPosition() const {
 
 template<size_t N>
 void PositionDeskController<N>::setPosition(const String& newPositionName) {
-  const Position newPosition = params.getPosition(newPositionName);
+  const auto newPosition = params.getPosition(newPositionName);
   setHeightImpl(newPosition);
 }
 
 template<size_t N>
 void PositionDeskController<N>::raisePosition() {
-  const Position newPosition = params.getHigherPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
+  const auto newPosition = params.getHigherPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
   setHeightImpl(newPosition);
 }
 
 template<size_t N>
 void PositionDeskController<N>::lowerPosition() {
-  const Position newPosition = params.getLowerPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
+  const auto newPosition = params.getLowerPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
   setHeightImpl(newPosition);
 }
 
 template<size_t N>
 void PositionDeskController<N>::setHeightImpl(const Position& newPosition) {
-  if (!isnan(newPosition.second)) {
-    HeightDeskController::setHeight(newPosition.second);
+  if (!isnan(newPosition.height)) {
+    HeightDeskController::setHeight(newPosition.height);
   }
 }
 
