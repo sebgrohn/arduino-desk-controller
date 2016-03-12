@@ -63,7 +63,7 @@ PositionDeskController<4>::Params controllerParams(
     minHeight, maxHeight, upSpeed, downSpeed);
 PositionDeskController<4> controller(controllerParams, eepromCurrentHeight, eepromTargetHeight);
 
-LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
+//LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
 
 boolean serialInitialized = false;
 
@@ -86,13 +86,17 @@ void setup()  {
   setupDebouncer(enableDebouncer, enableInputPin);
   setupDebouncer(upDebouncer, upInputPin);
   setupDebouncer(downDebouncer, downInputPin);
+
+  ble_set_pins(bleREQNPin, bleRDYNPin);
+  ble_set_name("DeskCtrl");  // max. length 10
+  ble_begin();
   
-  lcd.createChar(DRIVE_DOWN_CHAR, DRIVE_DOWN_CHAR_DEFINITION);
-  lcd.createChar(DRIVE_UP_CHAR,   DRIVE_UP_CHAR_DEFINITION);
-  lcd.createChar(DRIVE_STOP_CHAR, DRIVE_STOP_CHAR_DEFINITION);
-  lcd.createChar(DRIVE_OK_CHAR,   DRIVE_OK_CHAR_DEFINITION);
-  lcd.begin(lcdNumCols, lcdNumRows);
-  lcd.clear();
+//  lcd.createChar(DRIVE_DOWN_CHAR, DRIVE_DOWN_CHAR_DEFINITION);
+//  lcd.createChar(DRIVE_UP_CHAR,   DRIVE_UP_CHAR_DEFINITION);
+//  lcd.createChar(DRIVE_STOP_CHAR, DRIVE_STOP_CHAR_DEFINITION);
+//  lcd.createChar(DRIVE_OK_CHAR,   DRIVE_OK_CHAR_DEFINITION);
+//  lcd.begin(lcdNumCols, lcdNumRows);
+//  lcd.clear();
   
   controller.params.insertPosition(minPosition,   minHeight);
   controller.params.insertPosition(sitPosition,   sitHeight);
@@ -182,7 +186,8 @@ void loop()  {
     eepromCurrentHeight = targetHeight;
   }
   
-  refreshDisplay(lcd);
+  ble_do_events();
+  //refreshDisplay(lcd);
   
   // Alarm.delay() instead of built-in delay(), so that alarms are processed timely.
   Alarm.delay(30);
@@ -205,30 +210,30 @@ void processSyncMessage() {
       printDateTime(Serial);
       Serial.println(F(" Time synced, setting alarms:"));
       
-      // 25 stå, 25-35 sitta
-      setupAlarm( 8, 25, setSitDeskPosition);    // 25
-      setupAlarm(10, 25, setSitDeskPosition);    // 25
-      setupAlarm(13, 10, setSitDeskPosition);    // 35
-      setupAlarm(15, 25, setSitDeskPosition);    // 35
-      Serial.println();
-      
-      setupAlarm( 8, 50, setStandDeskPosition);  // 25
-      setupAlarm(10, 50, setStandDeskPosition);  // 25
-      setupAlarm(13, 45, setStandDeskPosition);  // 25
-      setupAlarm(16,  0, setStandDeskPosition);  // 25
-      Serial.println();
-      
-      setupAlarm( 9, 15, setSitDeskPosition);    // 30
-      setupAlarm(11, 15, setSitDeskPosition);    // 30 + 1h lunch
-      setupAlarm(14, 10, setSitDeskPosition);    // 35
-      setupAlarm(16, 25, setSitDeskPosition);    // 35
-      Serial.println();
-      
-      setupAlarm( 9, 45, setStandDeskPosition);  // 25 + 15 fika
-      setupAlarm(12, 45, setStandDeskPosition);  // 25
-      setupAlarm(14, 45, setStandDeskPosition);  // 25 + 15 fika
-      setupAlarm(17,  0, setStandDeskPosition);  // 
-      Serial.println();
+//      // 25 stå, 25-35 sitta
+//      setupAlarm( 8, 25, setSitDeskPosition);    // 25
+//      setupAlarm(10, 25, setSitDeskPosition);    // 25
+//      setupAlarm(13, 10, setSitDeskPosition);    // 35
+//      setupAlarm(15, 25, setSitDeskPosition);    // 35
+//      Serial.println();
+//      
+//      setupAlarm( 8, 50, setStandDeskPosition);  // 25
+//      setupAlarm(10, 50, setStandDeskPosition);  // 25
+//      setupAlarm(13, 45, setStandDeskPosition);  // 25
+//      setupAlarm(16,  0, setStandDeskPosition);  // 25
+//      Serial.println();
+//      
+//      setupAlarm( 9, 15, setSitDeskPosition);    // 30
+//      setupAlarm(11, 15, setSitDeskPosition);    // 30 + 1h lunch
+//      setupAlarm(14, 10, setSitDeskPosition);    // 35
+//      setupAlarm(16, 25, setSitDeskPosition);    // 35
+//      Serial.println();
+//      
+//      setupAlarm( 9, 45, setStandDeskPosition);  // 25 + 15 fika
+//      setupAlarm(12, 45, setStandDeskPosition);  // 25
+//      setupAlarm(14, 45, setStandDeskPosition);  // 25 + 15 fika
+//      setupAlarm(17,  0, setStandDeskPosition);  // 
+//      Serial.println();
     } else {
       printDateTime(Serial);
       Serial.println(F(" Time synced"));
@@ -361,3 +366,4 @@ void refreshDisplay(LiquidCrystal& lcd) {
     printHeight(lcd, targetHeight, controller.params);
   }
 }
+

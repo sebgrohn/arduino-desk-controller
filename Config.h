@@ -21,6 +21,9 @@ const char enableInputPin = 0;
 const char upInputPin     = 5;
 const char downInputPin   = 4;
 
+const char bleREQNPin = 2;
+const char bleRDYNPin = 3;
+
 const char lcdRSPin      = 8;
 const char lcdEnablePin  = 9;
 const char lcdDataPins[] = { 10, 11, 12, 13 };  // data pin 4-7

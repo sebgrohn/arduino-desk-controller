@@ -17,6 +17,8 @@ The sketch depends on the following Arduino libraries:
 | [Bounce2](https://github.com/thomasfredericks/Bounce2)                     | 2.1     | [`Bounce2:2.1.0`](https://github.com/thomasfredericks/Bounce2/releases/tag/V2.1)               |
 | [Time](http://www.pjrc.com/teensy/td_libs_Time.html)                       | 1.5     | [`Time:1.5.0`](https://github.com/PaulStoffregen/Time/releases/tag/v1.5)                       |
 | [TimeAlarms](http://www.pjrc.com/teensy/td_libs_TimeAlarms.html)           | 1.4     | [`TimeAlarms:1.4.0`](https://github.com/PaulStoffregen/TimeAlarms/releases/tag/1.4.1)          |
+| [BLE SDK for Arduino](https://github.com/Cheong2K/ble-sdk-arduino)         | 1.0     | [``]()               |
+| [RBL_nRF8001](https://github.com/RedBearLab/nRF8001)                       | 1.0     | [``]()               |
 
 The standard libraries are bundled together with the Arduino IDE. The others must to be added manually,
 either via the [Library Manager](https://www.arduino.cc/en/Guide/Libraries#toc3) (new in Arduino IDE 1.6.2),
