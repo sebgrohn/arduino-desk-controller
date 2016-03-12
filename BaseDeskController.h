@@ -25,7 +25,7 @@ class BaseDeskController {
 public:
   typedef BaseDeskControllerParams Params;
   
-  const Params params;
+  Params params;
   
   BaseDeskController(const Params& params);
   

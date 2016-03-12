@@ -51,7 +51,7 @@ class PositionDeskController : public HeightDeskController {
 public:
   typedef PositionDeskControllerParams<N> Params;
   
-  const Params params;
+  Params params;
   
   PositionDeskController(const Params& params, const double& initialHeight);
   PositionDeskController(const Params& params, const double& initialHeight, const double& initialTargetHeight);
