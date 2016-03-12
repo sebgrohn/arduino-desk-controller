@@ -31,17 +31,8 @@ public:
   Position getPosition(const String& name) const;
   Position getPosition(const double& height) const;
   
-  Position getHigherPosition(const String& name) const;
-  Position getLowerPosition(const String& name) const;
-  
   Position getHigherPosition(const double& height) const;
   Position getLowerPosition(const double& height) const;
-  
-  Position getHighestPosition() const;
-  Position getLowestPosition() const;
-  
-  void insertPosition(const String& name, const double& height);
-  void erasePosition(const String& name);
   
 private:
   typedef std::map<double, String> RevPositionMap;
@@ -73,9 +64,6 @@ public:
   
   void raisePosition();
   void lowerPosition();
-  
-  void setHighestPosition();
-  void setLowestPosition();
   
 private:
   void setHeightImpl(const Position& newPosition);
