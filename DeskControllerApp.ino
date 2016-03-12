@@ -7,8 +7,9 @@
 #include <Bounce2.h>
 #include <LiquidCrystal.h>
 
+#include "Config.h"
+
 #include <unwind-cxx.h>
 #include <system_configuration.h>
 #include <StandardCplusplus.h>
 #include <utility.h>
-
