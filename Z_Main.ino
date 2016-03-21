@@ -64,25 +64,14 @@ PositionMap createControllerPositions() {
   controllerPositions[standPosition] = standHeight;
   return controllerPositions;
 }
-PositionDeskControllerParams controllerParams(
+TimerDeskControllerParams controllerParams(
     upControlPin, downControlPin,
     minHeight, maxHeight, upSpeed, downSpeed,
-    createControllerPositions());
-PositionDeskController controller(controllerParams, eepromCurrentHeight, eepromTargetHeight);
+    createControllerPositions(),
+    sitPosition, standPosition, 35 * 60, 25 * 60);
+TimerDeskController controller(controllerParams, eepromCurrentHeight, eepromTargetHeight);
 
 LiquidCrystal lcd(lcdRSPin, lcdEnablePin, lcdDataPins[0], lcdDataPins[1], lcdDataPins[2], lcdDataPins[3]);
-
-void setupAlarm(const int& hours, const int& minutes, void (*function)()) {
-  const boolean success = (Alarm.alarmRepeat(hours, minutes, 0, function) != dtINVALID_ALARM_ID);
-  
-  Serial.print('\t');
-  printDigits(Serial, hours);
-  Serial.print(':');
-  printDigits(Serial, minutes);
-  Serial.print(' ');
-  Serial.print(function != setStandDeskPosition ? (function != setSitDeskPosition ? '?' : 'v') : '^');
-  Serial.print(success ? F("") : F(" FAILED"));
-}
 
 
 void setup()  {
@@ -174,6 +163,19 @@ void loop()  {
     Serial.println();
     
     eepromCurrentHeight = targetHeight;
+    
+    const time_t currentTime    = now();
+    const time_t nextChangeTime = controller.getNextPositionChangeTime();
+    const double nextHeight     = controller.getNextHeight();
+    printDateTime(Serial, currentTime);
+    Serial.print(F(" Next position change: "));
+    printTimeShort(Serial, nextChangeTime);
+    Serial.print(F(", in "));
+    printTimeInterval(Serial, nextChangeTime - currentTime);
+    Serial.print(F(" ("));
+    printHeight(Serial, nextHeight);
+    Serial.print(')');
+    Serial.println();
   }
   
   refreshDisplay(lcd);
@@ -197,31 +199,21 @@ void processSyncMessage() {
     
     if (firstTime) {
       printDateTime(Serial);
-      Serial.println(F(" Time synced, setting alarms:"));
+      Serial.println(F(" Time synced, setting alarm."));
       
-      // 25 stå, 25-35 sitta
-      setupAlarm( 8, 25, setSitDeskPosition);    // 25
-      setupAlarm(10, 25, setSitDeskPosition);    // 25
-      setupAlarm(13, 10, setSitDeskPosition);    // 35
-      setupAlarm(15, 25, setSitDeskPosition);    // 35
-      Serial.println();
+      controller.scheduleNextPositionChange();
       
-      setupAlarm( 8, 50, setStandDeskPosition);  // 25
-      setupAlarm(10, 50, setStandDeskPosition);  // 25
-      setupAlarm(13, 45, setStandDeskPosition);  // 25
-      setupAlarm(16,  0, setStandDeskPosition);  // 25
-      Serial.println();
-      
-      setupAlarm( 9, 15, setSitDeskPosition);    // 30
-      setupAlarm(11, 15, setSitDeskPosition);    // 30 + 1h lunch
-      setupAlarm(14, 10, setSitDeskPosition);    // 35
-      setupAlarm(16, 25, setSitDeskPosition);    // 35
-      Serial.println();
-      
-      setupAlarm( 9, 45, setStandDeskPosition);  // 25 + 15 fika
-      setupAlarm(12, 45, setStandDeskPosition);  // 25
-      setupAlarm(14, 45, setStandDeskPosition);  // 25 + 15 fika
-      setupAlarm(17,  0, setStandDeskPosition);  // 
+      const time_t currentTime    = now();
+      const time_t nextChangeTime = controller.getNextPositionChangeTime();
+      const double nextHeight     = controller.getNextHeight();
+      printDateTime(Serial, currentTime);
+      Serial.print(F(" Next position change: "));
+      printTimeShort(Serial, nextChangeTime);
+      Serial.print(F(", in "));
+      printTimeInterval(Serial, nextChangeTime - currentTime);
+      Serial.print(F(" ("));
+      printHeight(Serial, nextHeight);
+      Serial.print(')');
       Serial.println();
     } else {
       printDateTime(Serial);
@@ -321,7 +313,7 @@ void refreshDisplay(LiquidCrystal& lcd) {
   // next alarm time
   if (timeStatus() != timeNotSet) {
     lcd.setCursor(10, 0);
-    printTimeInterval(lcd, Alarm.getNextTrigger() - currentTime);
+    printTimeInterval(lcd, controller.getNextPositionChangeTime() - currentTime);
   } else {
     lcd.setCursor(10, 0);
     lcd.print(F("      "));
