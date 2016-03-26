@@ -55,9 +55,9 @@ public:
   boolean wantToDriveUp() const;
   boolean wantToDriveDown() const;
   
-  void setHeight(const double& newHeight);
+  void setTargetHeight(const double& newTargetHeight);
   
-  void resumeDriving();
+  void resume();
   
   virtual boolean update();
   

@@ -42,11 +42,11 @@ public:
   virtual void setEnabled(const boolean& newEnabled);
   void toggleEnabled();
   
-  virtual void setDrivingDirection(const DeskDrivingDirection& direction);
+  virtual void setDrivingDirection(const DeskDrivingDirection& newDirection);
   
-  void startDriveUp();
-  void startDriveDown();
-  void stopDrive();
+  void driveUp();
+  void driveDown();
+  void stop();
   
 private:
   boolean enabled;

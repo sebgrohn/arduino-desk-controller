@@ -62,13 +62,13 @@ public:
   String getCurrentPosition() const;
   boolean isAtTargetPosition() const;
   
-  void setPosition(const String& newPositionName);
+  void setTargetPosition(const String& newTargetPositionName);
   
   void raisePosition();
   void lowerPosition();
   
 private:
-  void setHeightImpl(const Position& newPosition);
+  void setTargetHeightImpl(const Position& newTargetPosition);
 };
 
 #endif

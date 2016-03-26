@@ -29,7 +29,7 @@ boolean BaseDeskController::isDrivingDown() const { return drivingDirection == D
 
 void BaseDeskController::setEnabled(const boolean& newEnabled) {
   if (enabled && !newEnabled) {
-    stopDrive();
+    stop();
   }
   
   enabled = newEnabled;
@@ -43,12 +43,12 @@ void BaseDeskController::toggleEnabled() {
   }
 }
 
-void BaseDeskController::setDrivingDirection(const DeskDrivingDirection& newDrivingDirection) {
-  if (newDrivingDirection != NONE && !enabled) {
+void BaseDeskController::setDrivingDirection(const DeskDrivingDirection& newDirection) {
+  if (newDirection != NONE && !enabled) {
     return;
   }
   
-  switch (newDrivingDirection) {
+  switch (newDirection) {
   case UP:
     drivingDirection = UP;
     digitalWrite(params.downPin, LOW);
@@ -69,7 +69,7 @@ void BaseDeskController::setDrivingDirection(const DeskDrivingDirection& newDriv
   }
 }
 
-void BaseDeskController::startDriveUp()   { setDrivingDirection(UP); }
-void BaseDeskController::startDriveDown() { setDrivingDirection(DOWN); }
-void BaseDeskController::stopDrive()      { setDrivingDirection(NONE); }
+void BaseDeskController::driveUp()   { setDrivingDirection(UP); }
+void BaseDeskController::driveDown() { setDrivingDirection(DOWN); }
+void BaseDeskController::stop()      { setDrivingDirection(NONE); }
 

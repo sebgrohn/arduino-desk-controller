@@ -137,27 +137,27 @@ boolean PositionDeskController<N>::isAtTargetPosition() const {
 }
 
 template<size_t N>
-void PositionDeskController<N>::setPosition(const String& newPositionName) {
-  const auto newPosition = params.getPosition(newPositionName);
-  setHeightImpl(newPosition);
+void PositionDeskController<N>::setTargetPosition(const String& newTargetPositionName) {
+  const auto newTargetPosition = params.getPosition(newTargetPositionName);
+  setTargetHeightImpl(newTargetPosition);
 }
 
 template<size_t N>
 void PositionDeskController<N>::raisePosition() {
   const auto newPosition = params.getHigherPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
-  setHeightImpl(newPosition);
+  setTargetHeightImpl(newPosition);
 }
 
 template<size_t N>
 void PositionDeskController<N>::lowerPosition() {
   const auto newPosition = params.getLowerPosition(isAtTargetHeight() ? getTargetHeight() : getCurrentHeight());
-  setHeightImpl(newPosition);
+  setTargetHeightImpl(newPosition);
 }
 
 template<size_t N>
-void PositionDeskController<N>::setHeightImpl(const Position& newPosition) {
-  if (!isnan(newPosition.height)) {
-    HeightDeskController::setHeight(newPosition.height);
+void PositionDeskController<N>::setTargetHeightImpl(const Position& newTargetPosition) {
+  if (!isnan(newTargetPosition.height)) {
+    HeightDeskController::setTargetHeight(newTargetPosition.height);
   }
 }
 

@@ -99,18 +99,18 @@ boolean HeightDeskController::wantToDrive() const     { return getTargetDrivingD
 boolean HeightDeskController::wantToDriveUp() const   { return getTargetDrivingDirection() == UP; }
 boolean HeightDeskController::wantToDriveDown() const { return getTargetDrivingDirection() == DOWN; }
 
-void HeightDeskController::setHeight(const double& newHeight) {
-  targetHeight = constrain(newHeight, params.minHeight, params.maxHeight);
-  resumeDriving();
+void HeightDeskController::setTargetHeight(const double& newTargetHeight) {
+  targetHeight = constrain(newTargetHeight, params.minHeight, params.maxHeight);
+  resume();
 }
 
-void HeightDeskController::resumeDriving() {
+void HeightDeskController::resume() {
   setDrivingDirection(getTargetDrivingDirection());
 }
 
 boolean HeightDeskController::update() {
   if (isDriving() && isAtTargetHeight()) {
-    stopDrive();
+    stop();
     return true;
   } else {
     return false;

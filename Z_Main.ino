@@ -243,7 +243,7 @@ void setupDebouncer(Bounce& debouncer, const int& pin) {
 }
 
 void stopDesk() {
-  controller.stopDrive();
+  controller.stop();
   
   const double currentHeight = controller.getCurrentHeight();
   
@@ -256,7 +256,7 @@ void stopDesk() {
 }
 void abortDeskDrive() {
   const double currentHeight = controller.getCurrentHeight();
-  controller.setHeight(currentHeight);
+  controller.setTargetHeight(currentHeight);
   
   printDateTime(Serial);
   Serial.print(F(" Drove to height:    "));
@@ -266,7 +266,7 @@ void abortDeskDrive() {
   eepromCurrentHeight = currentHeight;
 }
 void resumeDeskDriving() {
-  controller.resumeDriving();
+  controller.resume();
   
   printDateTime(Serial);
   Serial.print(F(" Driving to height:  "));
@@ -274,7 +274,7 @@ void resumeDeskDriving() {
   Serial.println();
 }
 void setDeskPosition(const String& targetPosition) {
-  controller.setPosition(targetPosition);
+  controller.setTargetPosition(targetPosition);
   
   const double targetHeight = controller.getTargetHeight();
   
