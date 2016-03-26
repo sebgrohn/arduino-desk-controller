@@ -5,11 +5,6 @@
 #include <cmath>
 
 
-HeightDeskControllerParams::HeightDeskControllerParams() {}
-
-HeightDeskControllerParams::HeightDeskControllerParams(const char& upPin, const char& downPin)
-    : BaseDeskControllerParams(upPin, downPin) {}
-
 HeightDeskControllerParams::HeightDeskControllerParams(
   const char& upPin, const char& downPin,
   const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed)
@@ -60,8 +55,6 @@ HeightDeskController::HeightDeskController(const Params& params, const double& i
   targetHeight      = constrain(initialTargetHeight, params.minHeight, params.maxHeight);
 }
 
-double HeightDeskController::getTargetHeight() const { return targetHeight; }
-
 double HeightDeskController::getCurrentHeight() const {
   const double timeInterval = (millis() - startDrivingTime) / double(1000);
   const double currentHeight = lastStoppedHeight + params.getHeightDiffForTimeInterval(timeInterval, getDrivingDirection());
@@ -95,17 +88,9 @@ DeskDrivingDirection HeightDeskController::getTargetDrivingDirection() const {
   }
 }
 
-boolean HeightDeskController::wantToDrive() const     { return getTargetDrivingDirection() != NONE; }
-boolean HeightDeskController::wantToDriveUp() const   { return getTargetDrivingDirection() == UP; }
-boolean HeightDeskController::wantToDriveDown() const { return getTargetDrivingDirection() == DOWN; }
-
 void HeightDeskController::setTargetHeight(const double& newTargetHeight) {
   targetHeight = constrain(newTargetHeight, params.minHeight, params.maxHeight);
   resume();
-}
-
-void HeightDeskController::resume() {
-  setDrivingDirection(getTargetDrivingDirection());
 }
 
 boolean HeightDeskController::update() {

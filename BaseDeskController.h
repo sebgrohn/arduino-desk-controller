@@ -15,8 +15,7 @@ struct BaseDeskControllerParams {
   char upPin;
   char downPin;
   
-  BaseDeskControllerParams();
-  
+  BaseDeskControllerParams() {}
   BaseDeskControllerParams(const char& upPin, const char& downPin);
 };
 
@@ -29,24 +28,24 @@ public:
   
   BaseDeskController(const Params& params);
   
-  virtual ~BaseDeskController();
+  virtual ~BaseDeskController() {}
   
-  boolean isEnabled() const;
+  boolean isEnabled() const { return enabled; }
   
-  DeskDrivingDirection getDrivingDirection() const;
+  DeskDrivingDirection getDrivingDirection() const { return drivingDirection; }
   
-  boolean isDriving() const;
-  boolean isDrivingUp() const;
-  boolean isDrivingDown() const;
+  boolean isDriving() const     { return drivingDirection != NONE; }
+  boolean isDrivingUp() const   { return drivingDirection == UP; }
+  boolean isDrivingDown() const { return drivingDirection == DOWN; }
   
   virtual void setEnabled(const boolean& newEnabled);
   void toggleEnabled();
   
   virtual void setDrivingDirection(const DeskDrivingDirection& newDirection);
   
-  void driveUp();
-  void driveDown();
-  void stop();
+  void driveUp()   { setDrivingDirection(UP); }
+  void driveDown() { setDrivingDirection(DOWN); }
+  void stop()      { setDrivingDirection(NONE); }
   
 private:
   boolean enabled;

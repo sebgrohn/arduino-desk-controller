@@ -11,7 +11,7 @@
 struct Position {
   static const Position empty;
   
-  Position();
+  Position() {}
   Position(const String& name, const double& height);
   
   String name;
@@ -22,17 +22,18 @@ struct Position {
 template<size_t N>
 class PositionDeskControllerParams : public HeightDeskControllerParams {
 public:
-  static const size_t maxPositions;
+  static const size_t maxPositions = N;
   
-  PositionDeskControllerParams();
-  
-  PositionDeskControllerParams(const char& upPin, const char& downPin);
+  PositionDeskControllerParams() {}
+  PositionDeskControllerParams(const char& upPin, const char& downPin)
+      : HeightDeskControllerParams(upPin, downPin) {}
   
   PositionDeskControllerParams(
     const char& upPin, const char& downPin,
-    const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed);
+    const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed) 
+      : HeightDeskControllerParams(upPin, downPin, minHeight, maxHeight, upSpeed, downSpeed) {}
   
-  size_t getNumPositions() const;
+  size_t getNumPositions() const { return numPositions; }
   
   Position getPosition(const String& name) const;
   Position getPosition(const double& height) const;

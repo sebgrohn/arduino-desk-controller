@@ -20,9 +20,9 @@ struct HeightDeskControllerParams : public BaseDeskControllerParams {
   // The speed with which the desk is lowered, in m/s.
   double downSpeed;
   
-  HeightDeskControllerParams();
-  
-  HeightDeskControllerParams(const char& upPin, const char& downPin);
+  HeightDeskControllerParams() {}
+  HeightDeskControllerParams(const char& upPin, const char& downPin)
+      : BaseDeskControllerParams(upPin, downPin) {}
   
   HeightDeskControllerParams(
     const char& upPin, const char& downPin,
@@ -45,19 +45,19 @@ public:
   HeightDeskController(const Params& params, const double& initialHeight);
   HeightDeskController(const Params& params, const double& initialHeight, const double& initialTargetHeight);
   
-  double getTargetHeight() const;
+  double getTargetHeight() const { return targetHeight; }
   double getCurrentHeight() const;
   boolean isAtTargetHeight() const;
   
   DeskDrivingDirection getTargetDrivingDirection() const;
   
-  boolean wantToDrive() const;
-  boolean wantToDriveUp() const;
-  boolean wantToDriveDown() const;
+  boolean wantToDrive() const     { return getTargetDrivingDirection() != NONE; }
+  boolean wantToDriveUp() const   { return getTargetDrivingDirection() == UP; }
+  boolean wantToDriveDown() const { return getTargetDrivingDirection() == DOWN; }
   
   void setTargetHeight(const double& newTargetHeight);
   
-  void resume();
+  void resume() { setDrivingDirection(getTargetDrivingDirection()); }
   
   virtual boolean update();
   

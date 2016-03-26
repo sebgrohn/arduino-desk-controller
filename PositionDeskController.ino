@@ -7,33 +7,10 @@
 
 const Position Position::empty = Position(String(), std::numeric_limits<double>::quiet_NaN());
 
-Position::Position() {}
-
 Position::Position(const String& name, const double& height)
     : name(name),
       height(height) {}
 
-
-template<size_t N>
-const size_t PositionDeskControllerParams<N>::maxPositions = N;
-
-template<size_t N>
-PositionDeskControllerParams<N>::PositionDeskControllerParams() {}
-
-template<size_t N>
-PositionDeskControllerParams<N>::PositionDeskControllerParams(const char& upPin, const char& downPin)
-    : HeightDeskControllerParams(upPin, downPin) {}
-
-template<size_t N>
-PositionDeskControllerParams<N>::PositionDeskControllerParams(
-  const char& upPin, const char& downPin,
-  const double& minHeight, const double& maxHeight, const double& upSpeed, const double& downSpeed)
-    : HeightDeskControllerParams(upPin, downPin, minHeight, maxHeight, upSpeed, downSpeed) {}
-
-template<size_t N>
-size_t PositionDeskControllerParams<N>::getNumPositions() const {
-  return numPositions;
-}
 
 template<size_t N>
 Position PositionDeskControllerParams<N>::getPosition(const String& name) const {
